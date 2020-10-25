@@ -1,0 +1,15 @@
+module alu (  // 16 bit ALU unit
+    // input clk,  // clock
+    // input rst,  // reset
+    input alufn[6],
+    input a[16],
+    input b[16],
+    output out[16]
+  ) {
+  
+  // alu modules go here
+
+  always {
+    out = 0;
+  }
+}
