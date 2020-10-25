@@ -6,6 +6,8 @@ module alu (  // 16 bit ALU unit
     input b[16],
     output out[16]
   ) {
+  
+  // alu modules go here
 
   always {
     out = 0;
