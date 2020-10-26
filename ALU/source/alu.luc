@@ -8,8 +8,31 @@ module alu (  // 16 bit ALU unit
   ) {
   
   // alu modules go here
-
+  comparator cmp;
   always {
-    out = 0;
+    cmp.alufn2 = alufn[2];
+    cmp.alufn1 = alufn[1];  
+    cmp.z = b0;
+    cmp.n = b0;
+    cmp.v = b0;
+    case(alufn[5]){
+      b0:
+        case(alufn[4]){
+          b0: 
+            if(alufn[1]==b0) out =0; //add/sub
+            else out=0; // multiplier 
+          b1: out = 0; //bool 
+        }
+      b1:
+        case(alufn[4]){
+          b0: out = 0; //shift 
+          b1: 
+            //add these later when the adder subtractor is in
+            //cmp.z = addSub.z; 
+            //cmp.n = addSub.n;
+            //cmp.v = addSub.v;
+            out = cmp.out; //cmp 
+       }
+   }
   }
 }
