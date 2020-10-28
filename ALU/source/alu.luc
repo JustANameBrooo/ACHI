@@ -8,15 +8,37 @@ module alu (  // 16 bit ALU unit
   ) {
   
   // alu modules go here
-  boolean boole;
-
+  comparator cmp;
+  adder add;
   always {
-  //bool
-    boole.a = a;
-    boole.b = b;
-    boole.alufn = alufn;
-    //to be made with multiplexer (if bool is selected)
-    out = boole.bool;
+    add.alufn0 = alufn[0];
+    add.a = a;
+    add.b = b;
+    cmp.alufn2 = alufn[2];
+    cmp.alufn1 = alufn[1];  
+    cmp.z = b0;
+    cmp.n = b0;
+    cmp.v = b0;
+
+    case (alufn[5]) {
+      b0:
+        case (alufn[4]) {
+          b0: 
+            if (alufn[1]==b0) out = add.out; //add/sub
+            else out = 0; // multiplier 
+          b1: out = 0; //bool 
+        }
+      b1:
+        case (alufn[4]) {
+          b0: out = 0; //shift 
+          b1: 
+            //assign z, n, v from adder to comparator
+            cmp.z = add.z; 
+            cmp.n = add.n;
+            cmp.v = add.v;
+            out = cmp.out; //cmp 
+       }
+   }
   }
 }
 
