@@ -7,6 +7,7 @@
     <src top="true">au_top.luc</src>
     <component>button_conditioner.luc</component>
     <src>alu_tester.luc</src>
+    <src>boolean.luc</src>
     <component>edge_detector.luc</component>
     <constraint lib="true">io.acf</constraint>
     <constraint lib="true">au.xdc</constraint>
