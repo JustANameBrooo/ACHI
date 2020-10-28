@@ -10,6 +10,7 @@ module alu (  // 16 bit ALU unit
   // alu modules go here
   comparator cmp;
   adder add;
+  multiplier mult;
   always {
     add.alufn0 = alufn[0];
     add.a = a;
@@ -19,13 +20,16 @@ module alu (  // 16 bit ALU unit
     cmp.z = b0;
     cmp.n = b0;
     cmp.v = b0;
+    // multiplier
+    mult.a = a;
+    mult.b = b;
 
     case (alufn[5]) {
       b0:
         case (alufn[4]) {
           b0: 
             if (alufn[1]==b0) out = add.out; //add/sub
-            else out = 0; // multiplier 
+            else out = mult.out; // multiplier 
           b1: out = 0; //bool 
         }
       b1:
