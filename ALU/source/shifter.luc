@@ -1,0 +1,165 @@
+module shifter (
+    input a[16],
+    input b[4],
+    input alufn0,
+    input alufn1,
+    output out[16]
+    
+  ) {
+
+  sig w[16]; sig x[16]; sig y[16];sig z[16];
+  
+  always {
+    //case 00 = shift left
+    //case 10 = shift left arithmetic dont need do since same as shift left    
+    //case 01 = shift rihgt
+    //case 11 = shift right arithmetic
+    case(alufn0){
+      b0: 
+      case(alufn1){
+        //00
+          b0:
+          //first shift 2^3 = 8 bits shift 
+          case(b[3]){
+              b0: w = a;
+              
+              b1: 
+              w[15:8] = a[7:0];
+              w[7:0] = 8b0;
+                
+              default:w=a;
+              }
+        
+          //Second shift 2^2 = 4 bits shift
+          case(b[2]){
+              b0: x = w;
+              
+              b1: 
+              x[15:4] = w[11:0];
+              x[3:0] = 4b0;
+                
+              default:x=w;
+              }
+          
+          //Third shift 2^1 = 2 bits shift
+          case(b[1]){
+              b0: y = x;
+              
+              b1: 
+              y[15:2] = x[13:0];
+              y[1:0] = 2b0;
+                
+              default:y=x;
+              }
+          
+          //Fourth shift 2^0 = 1 bit shift
+          case(b[0]){
+              b0: out = y;
+              
+              b1: 
+              out[15:1] = y[14:0];
+              out[0] = 1b0;
+                
+              default:out=y;
+              }
+          }
+        
+      b1:
+      case(alufn1){
+        //01 - Shift Right
+          b0:
+          //first shift 2^3 = 8 bits shift 
+          case(b[3]){
+              b0: w = a;
+              
+              b1: 
+              w[7:0] = a[15:8];
+              w[15:8] = 8b0;
+                
+              default:w=a;
+              }
+        
+          //Second shift 2^2 = 4 bits shift
+          case(b[2]){
+              b0: x = w;
+              
+              b1: 
+              x[11:0] = w[15:4];
+              x[15:12] = 4b0;
+                
+              default:x=w;
+              }
+          
+          //Third shift 2^1 = 2 bits shift
+          case(b[1]){
+              b0: y = x;
+              
+              b1: 
+              y[13:0] = x[15:2];
+              y[15:14] = 2b0;
+                
+              default:y=x;
+              }
+          
+          //Fourth shift 2^0 = 1 bit shift
+          case(b[0]){
+              b0: out = y;
+              
+              b1: 
+              out[14:0] = y[15:1];
+              out[15] = 1b0;
+                
+              default:out=y;
+              }
+            
+        //11 - Shift right arithmetic
+          b1:
+          //first shift 2^3 = 8 bits shift 
+          case(b[3]){
+              b0: w = a;
+              
+              b1: 
+              w[7:0] = a[15:8];
+              w[15:8] = 8*a[15];
+                
+              default:w=a;
+              }
+        
+          //Second shift 2^2 = 4 bits shift
+          case(b[2]){
+              b0: x = w;
+              
+              b1: 
+              x[11:0] = w[15:4];
+              x[15:12] = 4*a[15];
+                
+              default:x=w;
+              }
+          
+          //Third shift 2^1 = 2 bits shift
+          case(b[1]){
+              b0: y = x;
+              
+              b1: 
+              y[13:0] = x[15:2];
+              y[15:14] = 2*a[15];
+                
+              default:y=x;
+              }
+          
+          //Fourth shift 2^0 = 1 bit shift
+          case(b[0]){
+              b0: out = y;
+              
+              b1: 
+              out[14:0] = y[15:1];
+              out[15] = a[15];
+                
+              default:out=y;
+              }
+        }
+    
+      
+    }
+  }
+}
