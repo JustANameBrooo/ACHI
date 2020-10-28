@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ALU" board="Alchitry Au" language="Lucid" version="3">
   <files>
-    <src>alu_tester.luc</src>
+    <src>alu.luc</src>
     <component>pipeline.luc</component>
     <component>reset_conditioner.luc</component>
-    <src>alu.luc</src>
-    <component>edge_detector.luc</component>
-    <src>adder.luc</src>
     <src top="true">au_top.luc</src>
     <component>button_conditioner.luc</component>
-    <constraint lib="true">alchitry.acf</constraint>
+    <src>alu_tester.luc</src>
+    <src>adder.luc</src>
+    <src>comparator.luc</src>
+    <component>edge_detector.luc</component>
     <constraint lib="true">io.acf</constraint>
     <constraint lib="true">au.xdc</constraint>
+    <constraint lib="true">alchitry.acf</constraint>
   </files>
 </project>
