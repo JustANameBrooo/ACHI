@@ -2,7 +2,7 @@ module boolean (
     input alufn[4],               //defining inputs and outputs of module
     input a[16],
     input b[16],
-    output bool[16]
+    output out[16]
 
   ) {
 
@@ -10,12 +10,12 @@ module boolean (
   
     case (alufn) {
       // TODO: use a mux instead
-      4b1000: bool = a & b;  // and
-      4b1110: bool = a | b;  // or
-      4b0110: bool = a ^ b;  // xor
-      4b1010: bool = a;  // a
-      4b1100: bool = b;  // b
-      default:bool = 0;
+      4b1000: out = a & b;  // and
+      4b1110: out = a | b;  // or
+      4b0110: out = a ^ b;  // xor
+      4b1010: out = a;  // a
+      4b1100: out = b;  // b
+      default: out = 0;
     }
   }
 }
