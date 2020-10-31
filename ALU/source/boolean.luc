@@ -1,21 +1,27 @@
 module boolean (
-    input alufn[4],               //defining inputs and outputs of module
+    input alufn[6],               //defining inputs and outputs of module
     input a[16],
     input b[16],
     output out[16]
 
   ) {
+  var i; 
 
   always {
+    for (i=0; i< 16; i++){  //16 copies of a 4-to-1 multiplexer
   
-    case (alufn) {
-      // TODO: use a mux instead
-      4b1000: out = a & b;  // and
-      4b1110: out = a | b;  // or
-      4b0110: out = a ^ b;  // xor
-      4b1010: out = a;  // a
-      4b1100: out = b;  // b
-      default: out = 0;
+    case(alufn[3-:4]) {
+      4b1000: out[i] = a[i] & b[i];  // and
+      4b1110: out[i] = a[i] | b[i];  // or
+      4b0110: out[i] = a[i] ^ b[i];  // xor
+      4b1010: out[i] = a[i];  // a
+            
+      // possible additional functions (alu inputs)
+      4b1100: out[i] = b[i];  //b
+      4b0001: out[i] = ~(a[i] & b[i]); // nand
+      4b1111: out[i] = ~(a[i] | b[i]); // nor
+      4b0111: out[i] = ~(a[i] ^ b[i]); // xnor
+      default: out[i] = 0;
     }
   }
 }

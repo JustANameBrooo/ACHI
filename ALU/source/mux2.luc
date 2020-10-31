@@ -1,0 +1,19 @@
+module mux2 (
+    input alufn[2],               //defining inputs and outputs of module
+    input a,
+    input b,
+    output bool
+
+  ) {
+
+  always {
+  
+  
+    case(alufn) {
+      0: bool = alufn;             
+      1: bool = alufn;                
+
+      default: bool = 0;
+    }
+  }
+}
