@@ -31,19 +31,19 @@ module alu (  // 16 bit ALU unit
       b0:
         case (alufn[4]) {
           b0: 
-            if (alufn[1]==b0) out = add.out; //add/sub
+            if (alufn[1]==b0) out = add.out; // add/sub
             else out = 0; // multiplier 
-          b1: out = bool.out; //bool 
+          b1: out = bool.out; // bool 
         }
       b1:
         case (alufn[4]) {
-          b0: out = 0; //shift 
+          b0: out = 0; // shift
           b1: 
-            //assign z, n, v from adder to comparator
+            // assign z, n, v from adder to comparator
             cmp.z = add.z; 
             cmp.n = add.n;
             cmp.v = add.v;
-            out = cmp.out; //cmp 
+            out = cmp.out; // cmp 
        }
    }
   }
