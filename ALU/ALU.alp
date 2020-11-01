@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ALU" board="Alchitry Au" language="Lucid" version="3">
   <files>
-    <src>comparator.luc</src>
     <src>alu.luc</src>
     <component>pipeline.luc</component>
     <component>reset_conditioner.luc</component>
@@ -12,6 +11,8 @@
     <src>multiplier.luc</src>
     <src>mux2.luc</src>
     <src>boolean.luc</src>
+    <src>comparator.luc</src>
+    <src>shifter.luc</src>
     <component>edge_detector.luc</component>
     <constraint lib="true">io.acf</constraint>
     <constraint lib="true">au.xdc</constraint>
