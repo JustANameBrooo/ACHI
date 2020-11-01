@@ -10,6 +10,8 @@
     <src>alu_tester.luc</src>
     <src>adder.luc</src>
     <src>multiplier.luc</src>
+    <src>mux2.luc</src>
+    <src>boolean.luc</src>
     <component>edge_detector.luc</component>
     <constraint lib="true">io.acf</constraint>
     <constraint lib="true">au.xdc</constraint>

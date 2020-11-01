@@ -1,0 +1,14 @@
+module boolean (
+    input alufn[4],               //defining inputs and outputs of module
+    input a[16],
+    input b[16],
+    output out[16]
+  ) {
+
+  mux2 mux[16](.alufn(alufn));
+
+  always {
+    mux.a = a;
+    mux.b = b;
+    out = mux.out;
+}
