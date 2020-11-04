@@ -14,6 +14,7 @@
     <src>alu.luc</src>
     <component>counter.luc</component>
     <src>shifter.luc</src>
+    <src>shifterTester.luc</src>
     <src top="true">au_top.luc</src>
     <src>boolean.luc</src>
     <src>alu_tester.luc</src>
