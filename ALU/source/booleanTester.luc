@@ -57,21 +57,21 @@ module booleanTester (
             if (bool.out != 16b011000){
               state.d = state.FAIL;
               }
-          6:bool.alufn = 4b0001; // NAND
+          6:bool.alufn = 4b0111; // NAND
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
             if (bool.out != 16b110111){
               state.d = state.FAIL;
               }
           
-          7:bool.alufn = 4b1111; // NOR
+          7:bool.alufn = 4b0001; // NOR
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
             if (bool.out != 16b000101){
               state.d = state.FAIL;
               }
           
-          8:bool.alufn = 4b0111; // XNOR
+          8:bool.alufn = 4b1001; // XNOR
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
             if (bool.out != 16b001101){
