@@ -13,6 +13,7 @@
     <src>boolean.luc</src>
     <src>comparator.luc</src>
     <src>shifter.luc</src>
+    <src>shifterTester.luc</src>
     <component>edge_detector.luc</component>
     <constraint lib="true">io.acf</constraint>
     <constraint lib="true">au.xdc</constraint>
