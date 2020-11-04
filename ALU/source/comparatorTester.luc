@@ -1,0 +1,206 @@
+module comparatorTester (
+    input clk,  // clock
+    input rst,  // reset
+    input start,
+    output status[2]
+  ) {
+  //comparator always needs adder first 
+  adder ad;
+  comparator cmp;
+  dff testNum[4](#INIT(0),.clk(clk),.rst(rst)); // 12 cases 4 bits 1100
+  fsm state (.clk(clk),.rst(rst)) = {IDLE,TEST,PASS,FAIL};
+  always {
+    //define all the inputs for the adder and comparator 
+    ad.alufn0=1; //always subtract
+    ad.a = b0;
+    ad.b = b0;
+    cmp.alufn2 = 0;
+    cmp.alufn1 = 1;
+    cmp.z = ad.z;
+    cmp.n = ad.n;
+    cmp.v = ad.v;
+    
+    status = 0;
+    
+    //when not testing this unit automatically, make idle
+    if(start==0){ 
+      state.d =state.IDLE;
+    }
+    case(state.q){ 
+      state.IDLE:
+        status = 0;
+        if(start==1){ //start test at next cycle
+          state.d = state.TEST;
+          testNum.d = 0; 
+         }
+      state.TEST:
+        case(testNum.q){
+          //testcases for ==, < and <= are the same
+          /*
+            All follow the same pattern
+            1. give adder a & b inputs  
+            2. tell comparator which comparasion 
+              01: ==
+              10: <
+              11: <=
+            3. give comparator z,n,v from adder
+            4. check if comparator gives correct output 
+            5. if not correct, then fail
+          */ 
+          //first we test equals
+          h0: // test 0 == 0  a=b
+            ad.a = 16h0; 
+            ad.b = 16h0;
+            cmp.alufn2 = 0;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+          h1: //test 0xFFFF == 0xFFFF a=b
+            ad.a = 16hFFFF;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 0;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+           h2: //test 0xFFFF == 0 a>b
+            ad.a = 16hFFFF;
+            ad.b = 16h0;
+            cmp.alufn2 = 0;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+           h3: //test 0 == 0xFFFF a<b 
+            ad.a = 16h0;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 0;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+            
+            
+          //****************************************  
+          //second we test A<B 
+          h4: // test 0 < 0 a=b
+            ad.a = 16h0;
+            ad.b = 16h0;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+          h5: //test 0xFFFF < 0xFFFF a=b
+            ad.a = 16hFFFF;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+           h6: //test 0xFFFF < 0 a>b
+            ad.a = 16hFFFF;
+            ad.b = 16h0;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+           h7: //test 0 < 0xFFFF a<b 
+            ad.a = 16h0;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+          
+            
+          //****************************************  
+          //lastly we test A<=B 
+          h8: // test 0 <= 0 a=b
+            ad.a = 16h0;
+            ad.b = 16h0;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+          h9: //test 0xFFFF <= 0xFFFF a=b
+            ad.a = 16hFFFF;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+          h10: //test 0xFFFF <= 0 a>b
+            ad.a = 16hFFFF;
+            ad.b = 16h0;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+          h11: //test 0 <= 0xFFFF a<b 
+            ad.a = 16h0;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+           
+           //****************************************  
+           //if all test cases passed up to here, pass
+          h12:
+            state.d = state.PASS;
+          }
+        testNum.d = testNum.q+1; // incremenet for next case 
+      state.PASS:
+        status = 1;
+      state.FAIL:
+        status = 2;
+     }
+    
+    
+  }
+}
