@@ -47,13 +47,14 @@ module au_top (
     seg.values = {4d15, 4d15, 4d15, 4d15};
     
     // connect manual input
-    manual.button = buttondetector.out[1];  // down
+    manual.button = buttondetector.out[1:0];  // 1: down, 0: middle
     manual.dip[15:8] = io_dip[2];
     manual.dip[7:0] = io_dip[1];
     
     // connect auto input
-    auto.button = buttondetector.out[3:2];  // right and left
-    
+    auto.button[1:0] = buttondetector.out[3:2];  // 3: right, 2: left
+    auto.button[2] = buttondetector.out[0];  // middle
+        
     case (tester.q) {
       tester.MAN:
         io_led[2] = manual.out[15:8];

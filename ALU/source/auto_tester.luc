@@ -1,7 +1,7 @@
 module auto_tester (
     input clk,  // clock
     input rst,  // reset
-    input button[2],  // two buttons (left and right)
+    input button[3],  // three buttons (0: left, 1: right, 2: middle)
     output out_state[3],  // current testing state
     // 0: idle
     // 1: adder
@@ -9,7 +9,7 @@ module auto_tester (
     // 3: boolean
     // 4: shifter
     // 5: multiplier
-    output out_status[2],  // current tester status
+    output out_status[2]  // current tester status
     // 0: not done
     // 1: pass
     // 2: fail
@@ -93,5 +93,9 @@ module auto_tester (
         else if (button[1]) {  // pressed right
           state.d = state.IDLE;
         }
-  }
+    }
+ 
+    if (button[2]) {  // pressed middle, go back to idle
+      state.d = state.IDLE;
+    }
 }
