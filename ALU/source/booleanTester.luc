@@ -87,4 +87,6 @@ module booleanTester (
         status = 2;
     }    
     counter.d = counter.q+1;
+  }
 }
+
