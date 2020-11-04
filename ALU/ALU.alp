@@ -4,6 +4,7 @@
     <src>alu.luc</src>
     <src>alu_tester.luc</src>
     <src>mux2.luc</src>
+    <src>multiplierTester.luc</src>
     <src>boolean.luc</src>
     <src>multiplier.luc</src>
     <component>edge_detector.luc</component>

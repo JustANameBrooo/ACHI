@@ -2,7 +2,7 @@ module comparatorTester (
     input clk,  // clock
     input rst,  // reset
     input start,
-    output status[2]
+    output status[2] //0 = not done, 1=pass, 2 = fail
   ) {
   //comparator always needs adder first 
   adder ad;
@@ -70,7 +70,7 @@ module comparatorTester (
             if(cmp.out[0]!=1){
               state.d = state.FAIL;
             }
-           h2: //test 0xFFFF == 0 a>b
+           h2: //test 0xFFFF == 0 a<b
             ad.a = 16hFFFF;
             ad.b = 16h0;
             cmp.alufn2 = 0;
@@ -81,7 +81,7 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
-           h3: //test 0 == 0xFFFF a<b 
+           h3: //test 0 == 0xFFFF a>b
             ad.a = 16h0;
             ad.b = 16hFFFF;
             cmp.alufn2 = 0;
@@ -118,7 +118,7 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
-           h6: //test 0xFFFF < 0 a>b
+           h6: //test 0xFFFF < 0 a<b
             ad.a = 16hFFFF;
             ad.b = 16h0;
             cmp.alufn2 = 1;
@@ -126,10 +126,10 @@ module comparatorTester (
             cmp.z = ad.z;
             cmp.n = ad.n;
             cmp.v = ad.v;
-            if(cmp.out[0]!=0){
+            if(cmp.out[0]!=1){
               state.d = state.FAIL;
             }
-           h7: //test 0 < 0xFFFF a<b 
+           h7: //test 0 < 0xFFFF a>b 
             ad.a = 16h0;
             ad.b = 16hFFFF;
             cmp.alufn2 = 1;
@@ -137,7 +137,7 @@ module comparatorTester (
             cmp.z = ad.z;
             cmp.n = ad.n;
             cmp.v = ad.v;
-            if(cmp.out[0]!=1){
+            if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
           
@@ -166,7 +166,7 @@ module comparatorTester (
             if(cmp.out[0]!=1){
               state.d = state.FAIL;
             }
-          h10: //test 0xFFFF <= 0 a>b
+          h10: //test 0xFFFF <= 0 a<b
             ad.a = 16hFFFF;
             ad.b = 16h0;
             cmp.alufn2 = 1;
@@ -174,10 +174,10 @@ module comparatorTester (
             cmp.z = ad.z;
             cmp.n = ad.n;
             cmp.v = ad.v;
-            if(cmp.out[0]!=0){
+            if(cmp.out[0]!=1){
               state.d = state.FAIL;
             }
-          h11: //test 0 <= 0xFFFF a<b 
+          h11: //test 0 <= 0xFFFF a>b 
             ad.a = 16h0;
             ad.b = 16hFFFF;
             cmp.alufn2 = 1;
@@ -185,7 +185,7 @@ module comparatorTester (
             cmp.z = ad.z;
             cmp.n = ad.n;
             cmp.v = ad.v;
-            if(cmp.out[0]!=1){
+            if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
            
