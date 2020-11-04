@@ -36,6 +36,9 @@ module comparatorTester (
       state.TEST:
         case(testNum.q){
           //testcases for ==, < and <= are the same
+          //testing for < we think about pos<pos, neg<pos and neg<neg
+          //pos<pos and neg<neg do not have overflow 
+          //so need to test neg<pos overflow and no overflow
           /*
             All follow the same pattern
             1. give adder a & b inputs  
@@ -48,7 +51,7 @@ module comparatorTester (
             5. if not correct, then fail
           */ 
           //first we test equals
-          h0: // test 0 == 0  a=b
+          h0: // test 0 == 0  a=b 
             ad.a = 16h0; 
             ad.b = 16h0;
             cmp.alufn2 = 0;
@@ -58,8 +61,19 @@ module comparatorTester (
             cmp.v = ad.v;
             if(cmp.out[0]!=1){
               state.d = state.FAIL;
-            }
-          h1: //test 0xFFFF == 0xFFFF a=b
+            } 
+           h1: //test 1 == 1 pos=pos
+            ad.a = 16h1;
+            ad.b = 16h1;
+            cmp.alufn2 = 0;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }       
+          h2: //test 0xFFFF == 0xFFFF neg=neg
             ad.a = 16hFFFF;
             ad.b = 16hFFFF;
             cmp.alufn2 = 0;
@@ -70,9 +84,9 @@ module comparatorTester (
             if(cmp.out[0]!=1){
               state.d = state.FAIL;
             }
-           h2: //test 0xFFFF == 0 a<b
-            ad.a = 16hFFFF;
-            ad.b = 16h0;
+           h3: //test 0x8 == 0xA pos<pos no overflow
+            ad.a = 16h8;
+            ad.b = 16hA;
             cmp.alufn2 = 0;
             cmp.alufn1 = 1;
             cmp.z = ad.z;
@@ -81,7 +95,40 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
-           h3: //test 0 == 0xFFFF a>b
+           h4: //test 0xFFFF == 1 neg<pos no overflow
+            ad.a = 16hFFFF;
+            ad.b = 16h1;
+            cmp.alufn2 = 0;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+           h5: //test 0x8000 == 0x7FFF  neg<pos overflow
+            ad.a = 16h8000;
+            ad.b = 16h7FFF;
+            cmp.alufn2 = 0;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+            h6: //test 0xFFFE == 0xFFFF  neg<neg overflow
+            ad.a = 16hFFFE;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 0;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+           h7: //test 0 == 0xFFFF a>b
             ad.a = 16h0;
             ad.b = 16hFFFF;
             cmp.alufn2 = 0;
@@ -96,8 +143,8 @@ module comparatorTester (
             
           //****************************************  
           //second we test A<B 
-          h4: // test 0 < 0 a=b
-            ad.a = 16h0;
+          h8: // test 0 < 0  a=b 
+            ad.a = 16h0; 
             ad.b = 16h0;
             cmp.alufn2 = 1;
             cmp.alufn1 = 0;
@@ -106,8 +153,19 @@ module comparatorTester (
             cmp.v = ad.v;
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
-            }
-          h5: //test 0xFFFF < 0xFFFF a=b
+            } 
+           h9: //test 1 < 1 pos=pos
+            ad.a = 16h1;
+            ad.b = 16h1;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }       
+          hA: //test 0xFFFF < 0xFFFF neg=neg
             ad.a = 16hFFFF;
             ad.b = 16hFFFF;
             cmp.alufn2 = 1;
@@ -118,9 +176,9 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
-           h6: //test 0xFFFF < 0 a<b
-            ad.a = 16hFFFF;
-            ad.b = 16h0;
+           hB: //test 0x8 < 0xA pos<pos no overflow
+            ad.a = 16h8;
+            ad.b = 16hA;
             cmp.alufn2 = 1;
             cmp.alufn1 = 0;
             cmp.z = ad.z;
@@ -129,11 +187,135 @@ module comparatorTester (
             if(cmp.out[0]!=1){
               state.d = state.FAIL;
             }
-           h7: //test 0 < 0xFFFF a>b 
+           hC: //test 0xFFFF < 1 neg<pos no overflow
+            ad.a = 16hFFFF;
+            ad.b = 16h1;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+           hD: //test 0x8000 < 0x7FFF  neg<pos overflow
+            ad.a = 16h8000;
+            ad.b = 16h7FFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+            hE: //test 0xFFFE < 0xFFFF  neg<neg overflow
+            ad.a = 16hFFFE;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+           hF: //test 0 < 0xFFFF a>b
             ad.a = 16h0;
             ad.b = 16hFFFF;
             cmp.alufn2 = 1;
             cmp.alufn1 = 0;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=0){
+              state.d = state.FAIL;
+            }
+            
+          //****************************************  
+          //lastly we test A<=B 
+          h10: // test 0 <= 0  a=b 
+            ad.a = 16h0; 
+            ad.b = 16h0;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            } 
+           h11: //test 1 <= 1 pos=pos
+            ad.a = 16h1;
+            ad.b = 16h1;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }       
+          h12: //test 0xFFFF <= 0xFFFF neg=neg
+            ad.a = 16hFFFF;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+           h13: //test 0x8 <=0xA pos<pos no overflow
+            ad.a = 16h8;
+            ad.b = 16hA;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+           h14: //test 0xFFFF <=1 neg<pos no overflow
+            ad.a = 16hFFFF;
+            ad.b = 16h1;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+           h15: //test 0x8000 <= 0x7FFF  neg<pos overflow
+            ad.a = 16h8000;
+            ad.b = 16h7FFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+            h16: //test 0xFFFE <= 0xFFFF  neg<neg overflow
+            ad.a = 16hFFFE;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
+            cmp.z = ad.z;
+            cmp.n = ad.n;
+            cmp.v = ad.v;
+            if(cmp.out[0]!=1){
+              state.d = state.FAIL;
+            }
+           h17: //test 0 <= 0xFFFF a>b
+            ad.a = 16h0;
+            ad.b = 16hFFFF;
+            cmp.alufn2 = 1;
+            cmp.alufn1 = 1;
             cmp.z = ad.z;
             cmp.n = ad.n;
             cmp.v = ad.v;
@@ -141,57 +323,10 @@ module comparatorTester (
               state.d = state.FAIL;
             }
           
-            
-          //****************************************  
-          //lastly we test A<=B 
-          h8: // test 0 <= 0 a=b
-            ad.a = 16h0;
-            ad.b = 16h0;
-            cmp.alufn2 = 1;
-            cmp.alufn1 = 1;
-            cmp.z = ad.z;
-            cmp.n = ad.n;
-            cmp.v = ad.v;
-            if(cmp.out[0]!=1){
-              state.d = state.FAIL;
-            }
-          h9: //test 0xFFFF <= 0xFFFF a=b
-            ad.a = 16hFFFF;
-            ad.b = 16hFFFF;
-            cmp.alufn2 = 1;
-            cmp.alufn1 = 1;
-            cmp.z = ad.z;
-            cmp.n = ad.n;
-            cmp.v = ad.v;
-            if(cmp.out[0]!=1){
-              state.d = state.FAIL;
-            }
-          h10: //test 0xFFFF <= 0 a<b
-            ad.a = 16hFFFF;
-            ad.b = 16h0;
-            cmp.alufn2 = 1;
-            cmp.alufn1 = 1;
-            cmp.z = ad.z;
-            cmp.n = ad.n;
-            cmp.v = ad.v;
-            if(cmp.out[0]!=1){
-              state.d = state.FAIL;
-            }
-          h11: //test 0 <= 0xFFFF a>b 
-            ad.a = 16h0;
-            ad.b = 16hFFFF;
-            cmp.alufn2 = 1;
-            cmp.alufn1 = 1;
-            cmp.z = ad.z;
-            cmp.n = ad.n;
-            cmp.v = ad.v;
-            if(cmp.out[0]!=0){
-              state.d = state.FAIL;
-            }
            
            //****************************************  
            //if all test cases passed up to here, pass
-          h12:
+          h18:
             state.d = state.PASS;
           }
         testNum.d = testNum.q+1; // incremenet for next case 

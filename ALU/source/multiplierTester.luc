@@ -87,13 +87,13 @@ module multiplierTester (
             }
           //*4x0x4321 = 68740 dec 
           //lowest 16 bits is 0xC84 = 3204 dec pos*pos overflow
-          h10: 
+          hA: 
             mul.a = 16h4;
             mul.b = 16h4321;
             if(mul.out!=16hC84){
               state.d = state.FAIL;
             }
-          h11: //0xFFFE*0xFFFC = -2*-4* = 8 neg*neg no overflow
+          hB: //0xFFFE*0xFFFC = -2*-4* = 8 neg*neg no overflow
             mul.a = 16hFFFE;
             mul.b = 16hFFFC;
             if(mul.out!=16h8){
@@ -101,13 +101,13 @@ module multiplierTester (
             }
           //*0xF00Fx0xF00E = -4081*-4082= 16658642 dec  
           //lowest 16 bits is 0x30D2 = 12498 dec neg*neg overflow
-          h12: 
+          hC: 
             mul.a = 16hF00F;
             mul.b = 16hF00E;
             if(mul.out!=16h30D2){
               state.d = state.FAIL;
             }
-          h13: //2*0xFFFC = 2*-4* = -8 pos*neg no overflow
+          hD: //2*0xFFFC = 2*-4* = -8 pos*neg no overflow
             mul.a = 16h2;
             mul.b = 16hFFFC;
             if(mul.out!=16hFFF8){
@@ -115,7 +115,7 @@ module multiplierTester (
             } 
           //*0xFF1x0xF00E = 4081*-4082 = -16658642 dec 
           //lowest 16 bits is 0xCF2E = -12498 dec pos*neg overflow
-          h14: 
+          hE: 
             mul.a = 16hFF1;
             mul.b = 16hF00E;
             if(mul.out!=16hCF2E){
@@ -123,7 +123,7 @@ module multiplierTester (
             }
           //****************************************  
           //if all test cases passed up to here, pass
-          h15:
+          hF:
             state.d = state.PASS;
           }
         testNum.d = testNum.q+1; // incremenet for next case 
