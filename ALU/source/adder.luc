@@ -2,7 +2,7 @@
 module adder (
     // input clk,  // clock
     // input rst,  // reset
-    input alufn0,
+    input alufn0[6],
     input a[16],
     input b[16],
     output out[16],

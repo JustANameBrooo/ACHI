@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ALU" board="Alchitry Au" language="Lucid" version="3">
   <files>
+    <src>adderTest.luc</src>
     <src>alu_tester.luc</src>
     <component>pipeline.luc</component>
     <component>reset_conditioner.luc</component>
