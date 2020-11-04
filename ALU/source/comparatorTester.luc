@@ -7,7 +7,7 @@ module comparatorTester (
   //comparator always needs adder first 
   adder ad;
   comparator cmp;
-  dff testNum[4](#INIT(0),.clk(clk),.rst(rst)); // 12 cases 4 bits 1100
+  dff testNum[5](#INIT(0),.clk(clk),.rst(rst)); // 24 cases 5 bits 11000
   fsm state (.clk(clk),.rst(rst)) = {IDLE,TEST,PASS,FAIL};
   always {
     //define all the inputs for the adder and comparator 
