@@ -15,11 +15,11 @@ module auto_tester (
     // 2: fail
   ) {
   
-  test_adder test_adder(.clk(clk), .rst(rst));
-  test_compare test_compare(.clk(clk), .rst(rst));
-  test_boole test_boole(.clk(clk), .rst(rst));
-  test_shifter test_shifter(.clk(clk), .rst(rst));
-  test_multiply test_multiply(.clk(clk), .rst(rst));
+  adderTester test_adder(.clk(clk), .rst(rst));
+  comparatorTester test_compare(.clk(clk), .rst(rst));
+  booleanTester test_boole(.clk(clk), .rst(rst));
+  shifterTester test_shifter(.clk(clk), .rst(rst));
+  multiplierTester test_multiply(.clk(clk), .rst(rst));
   
   fsm state(.clk(clk), .rst(rst)) = {IDLE, ADDER, COMPARATOR, BOOLEAN, SHIFTER, MULTIPLIER};
   
