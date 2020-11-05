@@ -17,6 +17,7 @@
     <src>shifterTester.luc</src>
     <src top="true">au_top.luc</src>
     <src>boolean.luc</src>
+    <src>adderTester.luc</src>
     <src>alu_tester.luc</src>
     <src>adder.luc</src>
     <component>edge_detector.luc</component>
