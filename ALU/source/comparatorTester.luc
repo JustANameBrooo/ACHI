@@ -117,7 +117,7 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
-            h6: //test 0xFFFE == 0xFFFF  neg<neg overflow
+            h6: //test 0xFFFE == 0xFFFF  neg<neg no overflow
             ad.a = 16hFFFE;
             ad.b = 16hFFFF;
             cmp.alufn2 = 0;
@@ -209,7 +209,7 @@ module comparatorTester (
             if(cmp.out[0]!=1){
               state.d = state.FAIL;
             }
-            hE: //test 0xFFFE < 0xFFFF  neg<neg overflow
+            hE: //test 0xFFFE < 0xFFFF  neg<neg no overflow
             ad.a = 16hFFFE;
             ad.b = 16hFFFF;
             cmp.alufn2 = 1;
@@ -300,7 +300,7 @@ module comparatorTester (
             if(cmp.out[0]!=1){
               state.d = state.FAIL;
             }
-            h16: //test 0xFFFE <= 0xFFFF  neg<neg overflow
+            h16: //test 0xFFFE <= 0xFFFF  neg<neg no overflow
             ad.a = 16hFFFE;
             ad.b = 16hFFFF;
             cmp.alufn2 = 1;
