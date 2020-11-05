@@ -15,9 +15,9 @@ module auto_tester (
     // 2: fail
   ) {
   
-  adderTester test_adder(.clk(clk), .rst(rst));
+  comparatorTester test_adder(.clk(clk), .rst(rst));
   comparatorTester test_compare(.clk(clk), .rst(rst));
-  booleanTester test_boole(.clk(clk), .rst(rst));
+  comparatorTester test_boole(.clk(clk), .rst(rst));
   shifterTester test_shifter(.clk(clk), .rst(rst));
   multiplierTester test_multiply(.clk(clk), .rst(rst));
   

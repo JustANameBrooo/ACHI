@@ -95,6 +95,7 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
+           
            h4: //test 0xFFFF == 1 neg<pos no overflow
             ad.a = 16hFFFF;
             ad.b = 16h1;
@@ -106,6 +107,7 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
+           
            h5: //test 0x8000 == 0x7FFF  neg<pos overflow
             ad.a = 16h8000;
             ad.b = 16h7FFF;
@@ -117,6 +119,7 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
+            
             h6: //test 0xFFFE == 0xFFFF  neg<neg no overflow
             ad.a = 16hFFFE;
             ad.b = 16hFFFF;
@@ -140,9 +143,10 @@ module comparatorTester (
               state.d = state.FAIL;
             }
             
-            
+           
           //****************************************  
           //second we test A<B 
+          
           h8: // test 0 < 0  a=b 
             ad.a = 16h0; 
             ad.b = 16h0;
@@ -322,7 +326,7 @@ module comparatorTester (
             if(cmp.out[0]!=0){
               state.d = state.FAIL;
             }
-          
+         
            
            //****************************************  
            //if all test cases passed up to here, pass
@@ -334,7 +338,7 @@ module comparatorTester (
         status = 1;
       state.FAIL:
         status = 2;
-     }
+     } 
     
     
   }
