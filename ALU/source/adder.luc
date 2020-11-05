@@ -34,6 +34,6 @@ module adder (
     n = sum[15]; // negative when most significant bit is 1
     
     // z is true when S outputs are all 0
-    z =  ~|sum[15]; // NOR gate with S as inputs return 1 only when inputs are all 0 
+    z =  ~|sum; // NOR gate with S as inputs return 1 only when inputs are all 0 
   }
 }
