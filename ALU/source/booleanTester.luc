@@ -1,4 +1,4 @@
-module booleanTester (
+module booleantester (
     input clk,  // clock
     input rst,  // reset
     input start, //to change from 0-1 in au_top(commencing test)
@@ -18,6 +18,7 @@ module booleanTester (
     if (start == 0){
       state.d = state.IDLE;
     }
+    
     case(state.q){
       state.IDLE:
         status = 0;
@@ -32,51 +33,59 @@ module booleanTester (
           1:bool.alufn = 4b1000; //AND
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
-            if( bool.out != 16b1000){
+            if( bool.out != 16b01000){
               state.d = state.FAIL;
             }
+            
           2:bool.alufn = 4b1110; //OR
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
             if ( bool.out != 16b111010){
               state.d = state.FAIL;
-              }
+            }
+            
           3:bool.alufn = 4b0110; //XOR
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
             if (bool.out != 16b110010){
               state.d = state.FAIL;
-              }
+            }
+            
           4:bool.alufn = 4b1010; //"A"
-            bool.a = 16b101010; //42 
+            bool.a = 16b101010; //42
+            bool.b = 16b011000; //24 
             if (bool.out != 16b101010){
               state.d = state.FAIL;
-              }
+            }
+            
           5:bool.alufn = 4b1100; // "B"
+            bool.a = 16b101010; //42
             bool.b = 16b011000; //24
             if (bool.out != 16b011000){
               state.d = state.FAIL;
-              }
+            }
+            
           6:bool.alufn = 4b0111; // NAND
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
-            if (bool.out != 16b110111){
+            if (bool.out != 16hFFF7){
               state.d = state.FAIL;
-              }
+            }
           
           7:bool.alufn = 4b0001; // NOR
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
-            if (bool.out != 16b000101){
+            if (bool.out != 16hFFC5){
               state.d = state.FAIL;
-              }
+            }
           
           8:bool.alufn = 4b1001; // XNOR
             bool.a = 16b101010; //42 
             bool.b = 16b011000; //24
-            if (bool.out != 16b001101){
+            if (bool.out != 16hFFCD){
               state.d = state.FAIL;
-              }
+            }
+            
           9:state.d = state.PASS;
         }
         
@@ -86,7 +95,7 @@ module booleanTester (
       state.FAIL:
         status = 2;
     }    
-    counter.d = counter.q+1;
+    counter.d = counter.q+1;    
   }
 }
 
