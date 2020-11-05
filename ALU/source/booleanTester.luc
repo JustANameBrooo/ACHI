@@ -1,4 +1,4 @@
-module booleantester (
+module booleanTester (
     input clk,  // clock
     input rst,  // reset
     input start, //to change from 0-1 in au_top(commencing test)
