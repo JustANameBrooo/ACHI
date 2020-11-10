@@ -1,0 +1,98 @@
+module regfile (
+    input clk,  // clock
+    input rst,  // reset
+    input ra[4],
+    input rb[4],
+    input rc[4],
+    input we,
+    input data[16],
+    output time[4],
+    output error,
+    output level[2],
+    output stage[2],
+    output player[2],
+    output miss[2][2],
+    output tiles[2][3],
+    output pos[2][9],
+    output ra_data[16],
+    output rb_data[16]
+  ) {
+
+  dff reg_vac[9](.clk(clk), .rst(rst));
+  dff reg_pos1[9](.clk(clk), .rst(rst));
+  dff reg_pos2[9](.clk(clk), .rst(rst));
+  dff reg_tiles1[3](.clk(clk), .rst(rst));
+  dff reg_tiles2[3](.clk(clk), .rst(rst));
+  dff reg_player[2](.clk(clk), .rst(rst));
+  dff reg_time[4](.clk(clk), .rst(rst));
+  dff reg_level[2](.clk(clk), .rst(rst));
+  dff reg_stage[2](.clk(clk), .rst(rst));
+  dff reg_miss1[2](.clk(clk), .rst(rst));
+  dff reg_miss2[2](.clk(clk), .rst(rst));
+  dff reg_error(.clk(clk), .rst(rst));
+  
+  always {
+    
+    ra_data = 16h0000;
+    rb_data = 16h0000;
+    
+    if (we) {
+      case (rc) {
+        4h0: reg_vac.d = data[8:0];
+        4h1: reg_pos1.d = data[8:0];
+        4h2: reg_pos2.d = data[8:0];
+        4h3: reg_tiles1.d = data[2:0];
+        4h4: reg_tiles2.d = data[2:0];
+        4h5: reg_player.d = data[1:0];
+        4h6: reg_time.d = data[3:0];
+        4h7: reg_level.d = data[1:0];
+        4h8: reg_stage.d = data[1:0];
+        4h9: reg_miss1.d = data[1:0];
+        4hA: reg_miss2.d = data[1:0];
+        4hB: reg_error.d = data[0];
+      }
+    }
+    
+    case (ra) {
+      4h0: ra_data[8:0] = reg_vac.q;
+      4h1: ra_data[8:0] = reg_pos1.q;
+      4h2: ra_data[8:0] = reg_pos2.q;
+      4h3: ra_data[2:0] = reg_tiles1.q;
+      4h4: ra_data[2:0] = reg_tiles2.q;
+      4h5: ra_data[1:0] = reg_player.q;
+      4h6: ra_data[3:0] = reg_time.q;
+      4h7: ra_data[1:0] = reg_level.q;
+      4h8: ra_data[1:0] = reg_stage.q;
+      4h9: ra_data[1:0] = reg_miss1.q;
+      4hA: ra_data[1:0] = reg_miss2.q;
+      4hB: ra_data[0] = reg_error.q;
+    }
+    
+    case (rb) {
+      4h0: rb_data[8:0] = reg_vac.q;
+      4h1: rb_data[8:0] = reg_pos1.q;
+      4h2: rb_data[8:0] = reg_pos2.q;
+      4h3: rb_data[2:0] = reg_tiles1.q;
+      4h4: rb_data[2:0] = reg_tiles2.q;
+      4h5: rb_data[1:0] = reg_player.q;
+      4h6: rb_data[3:0] = reg_time.q;
+      4h7: rb_data[1:0] = reg_level.q;
+      4h8: rb_data[1:0] = reg_stage.q;
+      4h9: rb_data[1:0] = reg_miss1.q;
+      4hA: rb_data[1:0] = reg_miss2.q;
+      4hB: rb_data[0] = reg_error.q;
+    }
+    
+    pos[0] = reg_pos1.q;
+    pos[1] = reg_pos2.q;
+    tiles[0] = reg_tiles1.q;
+    tiles[1] = reg_tiles2.q;
+    player = reg_player.q;
+    time = reg_time.q;
+    level = reg_level.q;
+    stage = reg_stage.q;
+    miss[0] = reg_miss1.q;
+    miss[1] = reg_miss2.q;
+    error = reg_error.q;
+  }
+}

@@ -1,0 +1,21 @@
+module control (
+    input clk,  // clock
+    input rst,  // reset
+    input ra_data[16],
+    input rb_data[16],
+    input asel,
+    input bsel,
+    input wdsel,
+    input alufn[6],
+    output data[16]
+  ) {
+
+  alu alu;
+  
+  always {
+    alu.alufn = alufn;
+    alu.a = ra_data;
+    alu.b = rb_data;
+    data = alu.out;
+  }
+}
