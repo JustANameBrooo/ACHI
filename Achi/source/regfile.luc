@@ -18,18 +18,19 @@ module regfile (
     output rb_data[16]
   ) {
 
-  dff reg_vac[9](.clk(clk), .rst(rst));
-  dff reg_pos1[9](.clk(clk), .rst(rst));
-  dff reg_pos2[9](.clk(clk), .rst(rst));
-  dff reg_tiles1[3](.clk(clk), .rst(rst));
-  dff reg_tiles2[3](.clk(clk), .rst(rst));
-  dff reg_player[2](.clk(clk), .rst(rst));
-  dff reg_time[4](.clk(clk), .rst(rst));
-  dff reg_level[2](.clk(clk), .rst(rst));
-  dff reg_stage[2](.clk(clk), .rst(rst));
-  dff reg_miss1[2](.clk(clk), .rst(rst));
-  dff reg_miss2[2](.clk(clk), .rst(rst));
-  dff reg_error(.clk(clk), .rst(rst));
+  dff reg_vac[9](.clk(clk), .rst(rst));     // for each tile 0 - 8: 1 for vacant, 0 for occupied
+  dff reg_pos1[9](.clk(clk), .rst(rst));    // for each tile 0 - 8: 0 for not player1, 1 for player1
+  dff reg_pos2[9](.clk(clk), .rst(rst));    // for each tile 0 - 8: 0 for not player2, 1 for player1
+  dff reg_tiles1[3](.clk(clk), .rst(rst));  // 0 - 4: number of tiles player1 has taken
+  dff reg_tiles2[3](.clk(clk), .rst(rst));  // 0 - 4: number of tiles player2 has taken
+  dff reg_player[2](.clk(clk), .rst(rst));  // reg_player[0]: player1's LED, reg_player[1]: player2's LED
+  dff reg_time[4](.clk(clk), .rst(rst));    // 0 - 9: seconds, 15: no timing
+  dff reg_level[2](.clk(clk), .rst(rst));   // 0: idle/winning, 1: level1, 2: level2, 3: level3
+  dff reg_stage[2](.clk(clk), .rst(rst));   // 0: idle, 1: stage1, 2: stage2, 3: winning
+  dff reg_miss1[2](.clk(clk), .rst(rst));   // 0 - 2: number of misses of player1
+  dff reg_miss2[2](.clk(clk), .rst(rst));   // 0 - 2: number of misses of player2
+  dff reg_error(.clk(clk), .rst(rst));      // 0: no error, 1: error
+  dff reg_temp[4][16](.clk(clk), .rst(rst));// 4 temporary 16-bit registers
   
   always {
     
@@ -50,6 +51,10 @@ module regfile (
         4h9: reg_miss1.d = data[1:0];
         4hA: reg_miss2.d = data[1:0];
         4hB: reg_error.d = data[0];
+        4hC: reg_temp.d[0] = data;
+        4hD: reg_temp.d[1] = data;
+        4hE: reg_temp.d[2] = data;
+        4hF: reg_temp.d[3] = data;
       }
     }
     
@@ -66,6 +71,10 @@ module regfile (
       4h9: ra_data[1:0] = reg_miss1.q;
       4hA: ra_data[1:0] = reg_miss2.q;
       4hB: ra_data[0] = reg_error.q;
+      4hC: ra_data = reg_temp.q[0];
+      4hD: ra_data = reg_temp.q[1];
+      4hE: ra_data = reg_temp.q[2];
+      4hF: ra_data = reg_temp.q[3];
     }
     
     case (rb) {
@@ -81,6 +90,10 @@ module regfile (
       4h9: rb_data[1:0] = reg_miss1.q;
       4hA: rb_data[1:0] = reg_miss2.q;
       4hB: rb_data[0] = reg_error.q;
+      4hC: rb_data = reg_temp.q[0];
+      4hD: rb_data = reg_temp.q[1];
+      4hE: rb_data = reg_temp.q[2];
+      4hF: rb_data = reg_temp.q[3];
     }
     
     pos[0] = reg_pos1.q;
