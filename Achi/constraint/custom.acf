@@ -1,0 +1,115 @@
+pin clk CLOCK;
+clock clk 100MHz;
+
+pin rst_n RESET;
+
+// flip the Tx/Rx lines 
+pin usb_rx USB_TX;
+pin usb_tx USB_RX;
+
+//****************************************************************
+//PLAYER 1 PINS
+//first row of Bank A and first element of row 2 from the left 
+pin player1_grid_LED[0] A27;
+pin player1_grid_LED[1] A30;
+pin player1_grid_LED[2] A33;
+pin player1_grid_LED[3] A36;
+pin player1_grid_LED[4] A39;
+pin player1_grid_LED[5] A42;
+pin player1_grid_LED[6] A45;
+pin player1_grid_LED[7] A48;
+pin player1_grid_LED[8] A28;
+
+// 2nd to 5th element of row 2 from the left in Bank A
+
+pin player1_tiles_left_LED[0] A31;
+pin player1_tiles_left_LED[1] A34;
+pin player1_tiles_left_LED[2] A37;
+pin player1_tiles_left_LED[3] A40;
+
+// 3rd and 4th element from the right of row 2 of Bank A
+pin player1_missed_LED[0] A43; 
+pin player1_missed_LED[1] A46;
+
+//2nd last element from the right of row 2 of Bank A
+pin player1_turn_LED A49; 
+
+//****************************************************************
+//PLAYER 2 PINS
+//3rd row of Bank A and first element of row 4 from the left 
+pin player2_grid_LED[0] A24;
+pin player2_grid_LED[1] A21;
+pin player2_grid_LED[2] A18;
+pin player2_grid_LED[3] A15;
+pin player2_grid_LED[4] A12;
+pin player2_grid_LED[5] A9;
+pin player2_grid_LED[6] A6;
+pin player2_grid_LED[7] A3;
+pin player2_grid_LED[8] A23;
+
+// 2nd to 5th element of row 4 from the left in Bank A
+pin player2_tiles_left_LED[0] A20;
+pin player2_tiles_left_LED[1] A17;
+pin player2_tiles_left_LED[2] A14;
+pin player2_tiles_left_LED[3] A11;
+
+// 3rd and 4th element from the right of row 4 of Bank A
+pin player2_missed_LED[0] A8; 
+pin player2_missed_LED[1] A5; 
+
+//2nd last element from the right of row 4 of Bank A
+pin player2_turn_LED A2;
+
+
+//****************************************************************
+//Indicator LEDS
+//1st to 3rd element in row 3 of Bank B from the left
+pin choose_level_LED[0] B24;
+pin choose_level_LED[1] C3; //B21 doesnt work
+pin choose_level_LED[2] B18;
+
+//4th and 5th element in row 3 of Bank B from the left
+pin current_stage_LED[0] B15;
+pin current_stage_LED[1] B12;
+
+//4th element of row 3 of Bank B from the right
+pin error_LED B9;
+
+
+//****************************************************************
+//INDICATOR OTHERS
+//3 element of 3rd row of Bank D from the left 
+// D17 is an analog pin, if need digital then use B6
+//B6 is the 3rd element of row 3 of Bank B from the right
+//pin buzzer D17; //analog 
+pin buzzer B6;
+
+//row 4 of Bank B
+pin timer_7seg[0] B23;
+pin timer_7seg[1] B20;
+pin timer_7seg[2] B17;
+pin timer_7seg[3] B14;
+pin timer_7seg[4] B11;
+pin timer_7seg[5] B8;
+pin timer_7seg[6] B5;
+pin timer_7seg[7] B2;
+
+
+
+//****************************************************************
+//BUTTONS
+//first row of Bank B and first element of row 2 from the left 
+pin grid_buttons[0] B27 pulldown;
+pin grid_buttons[1] B30 pulldown;
+pin grid_buttons[2] B33 pulldown;
+pin grid_buttons[3] B36 pulldown;
+pin grid_buttons[4] B39 pulldown;
+pin grid_buttons[5] B42 pulldown;
+pin grid_buttons[6] B45 pulldown;
+pin grid_buttons[7] B48 pulldown;
+pin grid_buttons[8] B28 pulldown;
+ 
+//second row of Bank B 2nd to 4th element of row 2 from the right
+pin choose_level_buttons[0] B43 pulldown;
+pin choose_level_buttons[1] B46 pulldown;
+pin choose_level_buttons[2] B49 pulldown;

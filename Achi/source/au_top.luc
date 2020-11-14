@@ -1,9 +1,27 @@
 module au_top (
     input clk,              // 100MHz clock
-    input rst_n,            // reset button (active low)
-    output led [8],         // 8 user controllable LEDs
+    input rst_n,            // reset button (active low)   
     input usb_rx,           // USB->Serial input
-    output usb_tx           // USB->Serial output
+    output usb_tx,           // USB->Serial output
+    
+    input grid_buttons[9],    // 9 buttons for the 3x3 grid
+    input choose_level_buttons[3],     // 3 buttons to choose the level
+    
+    output player1_grid_LED[9], // yellow leds in the 3x3 grid
+    output player2_grid_LED[9],// blue leds in the 3x3 grid 
+    output player1_tiles_left_LED[4], //yellow player 1 tiles to indicate number of tiles left 
+    output player2_tiles_left_LED[4], //blue player 2 tiles to indicate number of tiles left 
+    output player1_missed_LED[2], //player 1 missed indicators 
+    output player2_missed_LED[2], //player 2 missed indicators 
+    output player1_turn_LED, //player 1 current turn 
+    output player2_turn_LED, //player 1 current turn 
+    
+    output choose_level_LED[3], //the leds for the 3 level buttons 
+    output current_stage_LED[2], //the leds to show which stage players are in
+    output error_LED, //led to show an error occurred
+    output buzzer, //passive buzzer for sound
+    output timer_7seg[8] // 7 segment for the countdown timer
+    
   ) {
   
   states statemachine(.clk(clk), .rst(rst));
@@ -21,9 +39,81 @@ module au_top (
   always {
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
-    
-    led = 8h00;             // turn LEDs off
-
+     
     usb_tx = usb_rx;        // echo the serial data
+    
+    //values used is for testing 
+    //3x3 GRID LEDS
+    //player1
+    player1_grid_LED[8] = 1;
+    player1_grid_LED[7] = 1;
+    player1_grid_LED[6] = 1;
+    player1_grid_LED[5] = 1;
+    player1_grid_LED[4] = 1;
+    player1_grid_LED[3] = 1;
+    player1_grid_LED[2] = 1;
+    player1_grid_LED[1] = 1;
+    player1_grid_LED[0] = 1;
+ 
+    //player2
+    player2_grid_LED[8] = 1;
+    player2_grid_LED[7] = 1;
+    player2_grid_LED[6] = 1;
+    player2_grid_LED[5] = 1;
+    player2_grid_LED[4] = 1;
+    player2_grid_LED[3] = 1;
+    player2_grid_LED[2] = 1;
+    player2_grid_LED[1] = 1;
+    player2_grid_LED[0] = 1;
+
+    
+    //PLAYER TILES LEFT LED
+    //player1
+    player1_tiles_left_LED[3] = 1;
+    player1_tiles_left_LED[2] = 1;
+    player1_tiles_left_LED[1] = 1;
+    player1_tiles_left_LED[0] = 1;
+    
+    //player2
+    player2_tiles_left_LED[3] = 1;
+    player2_tiles_left_LED[2] = 1;
+    player2_tiles_left_LED[1] = 1;
+    player2_tiles_left_LED[0] = 1;
+    
+    //PLAYER MISSED LED
+    //player1
+    player1_missed_LED[1] = 1;
+    player1_missed_LED[0] = 1;
+    
+    //player2
+    player2_missed_LED[1] = 1;
+    player2_missed_LED[0] = 1;
+    
+    //PLAYER TURN LED
+    player1_turn_LED = 1;
+    player2_turn_LED = 1; 
+    
+    //INDICATOR LEDS
+    choose_level_LED[2] = 1;  
+    choose_level_LED[1] = 1; 
+    choose_level_LED[0] = 1; 
+
+    current_stage_LED[1] = 1; 
+    current_stage_LED[0] = 1; 
+    error_LED = 1;
+    
+    //INDICATORS
+    buzzer = 0; //passive buzzer for sound
+    timer_7seg[7] = 0; 
+    timer_7seg[6] = 0; 
+    timer_7seg[5] = 0; 
+    timer_7seg[4] = 0; 
+    timer_7seg[3] = 0; 
+    timer_7seg[2] = 0; 
+    timer_7seg[1] = 0; 
+    timer_7seg[0] = 0; 
+    
+    player1_grid_LED[8:0] = grid_buttons[8:0];
+    choose_level_LED[2:0] = choose_level_buttons[2:0];
   }
 }
