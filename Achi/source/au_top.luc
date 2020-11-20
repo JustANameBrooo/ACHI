@@ -23,97 +23,162 @@ module au_top (
     output timer_7seg[8] // 7 segment for the countdown timer
     
   ) {
+    
+  sig rst;                  // reset signal
   
   states statemachine(.clk(clk), .rst(rst));
   regfile reg(.clk(clk), .rst(rst));
   control ctrl(.clk(clk), .rst(rst));  
   
-  sig rst;                  // reset signal
+  seven_segment_decoder seven_seg_decoder;
+  
+  passive_buzzer pass_buzz(.clk(clk), .rst(rst));
+  
+  //button detection components
+  button_conditioner gridbuttoncond[9](.clk(clk));
+  button_conditioner levelbuttoncond[3](.clk(clk));
+
+  edge_detector gridbuttondetector[9](#RISE(1), #FALL(0), .clk(clk)); // detect rising edges
+  edge_detector levelbuttondetector[3](#RISE(1), #FALL(0), .clk(clk)); // detect rising edges
+
   
   .clk(clk) {
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
-    reset_conditioner reset_cond;
+        reset_conditioner reset_cond;
   }
   
   always {
+  
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
      
     usb_tx = usb_rx;        // echo the serial data
     
-    //values used is for testing 
-    //3x3 GRID LEDS
-    //player1
-    player1_grid_LED[8] = 1;
-    player1_grid_LED[7] = 1;
-    player1_grid_LED[6] = 1;
-    player1_grid_LED[5] = 1;
-    player1_grid_LED[4] = 1;
-    player1_grid_LED[3] = 1;
-    player1_grid_LED[2] = 1;
-    player1_grid_LED[1] = 1;
-    player1_grid_LED[0] = 1;
- 
-    //player2
-    player2_grid_LED[8] = 1;
-    player2_grid_LED[7] = 1;
-    player2_grid_LED[6] = 1;
-    player2_grid_LED[5] = 1;
-    player2_grid_LED[4] = 1;
-    player2_grid_LED[3] = 1;
-    player2_grid_LED[2] = 1;
-    player2_grid_LED[1] = 1;
-    player2_grid_LED[0] = 1;
+    
+    //detect all the buttons for the grid
+    gridbuttoncond.in = grid_buttons[8:0];
+    gridbuttondetector.in = gridbuttoncond.out;
+    
+    //detect all the buttons for the level
+    levelbuttoncond.in = choose_level_buttons[2:0];
+    levelbuttondetector.in = levelbuttoncond.out;
+    
+    
+    //statemachine inputs
+    statemachine.rb_data[15:0] = reg.rb_data[15:0];
+    statemachine.grid_in = gridbuttondetector.out;
+    statemachine.start = levelbuttondetector.out;
+    
+    //regfile inputs 
+    reg.ra[4:0] = statemachine.ra[4:0];
+    reg.rb[4:0] = statemachine.rb[4:0];
+    reg.rc[4:0] = statemachine.rc[4:0];
+    reg.we = statemachine.we;
+    reg.data[15:0] = ctrl.data[15:0];
+    
+    //control inputs 
+    ctrl.asel = statemachine.asel;
+    ctrl.bsel = statemachine.bsel;
+    ctrl.wdsel = statemachine.wdsel;
+    ctrl.alufn[5:0] = statemachine.alufn[5:0];
+    ctrl.ra_data[15:0] = reg.ra_data[15:0];
+    ctrl.rb_data[15:0] = reg.rb_data[15:0];
+    
+    //seven seg timer input 
+    seven_seg_decoder.timer_value[3:0] = reg.time[3:0];
+    
+    //passive_buzzer inputs
+    if(reg.stage==3){        //someone won
+      pass_buzz.playing =1;
+      pass_buzz.winLose =1;
+    } else if(reg.error==1){ //error
+      pass_buzz.playing =1;
+      pass_buzz.winLose =0;
+    } else {                 //no sound
+      pass_buzz.playing =0;
+      pass_buzz.winLose =0;
+    }
+    
+    //direct connection to the outputs
+    //3x3 GRID LEDS & PLAYER TILES LEFT LED
+    
+    //someone won
+    if(reg.stage==3){
+      //if player 1 wins, light up all their leds
+      if(reg.player==2b01){
+         player1_grid_LED[8:0] = 9b000000000;
+         player2_grid_LED[8:0] = 9b111111111;
+         player1_tiles_left_LED[3:0] = 4b1111;
+         player2_tiles_left_LED[3:0] = 4b0000;
 
-    
-    //PLAYER TILES LEFT LED
-    //player1
-    player1_tiles_left_LED[3] = 1;
-    player1_tiles_left_LED[2] = 1;
-    player1_tiles_left_LED[1] = 1;
-    player1_tiles_left_LED[0] = 1;
-    
-    //player2
-    player2_tiles_left_LED[3] = 1;
-    player2_tiles_left_LED[2] = 1;
-    player2_tiles_left_LED[1] = 1;
-    player2_tiles_left_LED[0] = 1;
+      } else{ //if player 2 wins, light up all their leds
+         player1_grid_LED[8:0] = 9b000000000;
+         player2_grid_LED[8:0] = 9b111111111;
+         player1_tiles_left_LED[3:0] = 4b0000;
+         player2_tiles_left_LED[3:0] = 4b1111;
+      }
+    } else{ //no one won yet
+      player1_grid_LED[8:0] = reg.pos[0];
+      player2_grid_LED[8:0] = reg.pos[1];
+
+      player1_tiles_left_LED[3:0] = reg.tiles[0];
+      player2_tiles_left_LED[3:0] = reg.tiles[1];
+    }
     
     //PLAYER MISSED LED
     //player1
-    player1_missed_LED[1] = 1;
-    player1_missed_LED[0] = 1;
+    //normally nothing lights up
+    player1_missed_LED[0] = reg.miss[0][0];
+    player1_missed_LED[1] = reg.miss[0][1];
     
     //player2
-    player2_missed_LED[1] = 1;
-    player2_missed_LED[0] = 1;
+    //normally nothing lights up
+    player2_missed_LED[0] = reg.miss[1][0];
+    player2_missed_LED[1] = reg.miss[1][1];
+       
     
     //PLAYER TURN LED
-    player1_turn_LED = 1;
-    player2_turn_LED = 1; 
+    player1_turn_LED = reg.player[0];
+    player2_turn_LED = reg.player[1]; 
     
     //INDICATOR LEDS
-    choose_level_LED[2] = 1;  
-    choose_level_LED[1] = 1; 
-    choose_level_LED[0] = 1; 
-
-    current_stage_LED[1] = 1; 
-    current_stage_LED[0] = 1; 
-    error_LED = 1;
+    //LEVELS LEDS
+    choose_level_LED[2] = 0;  
+    choose_level_LED[1] = 0;
+    choose_level_LED[0] = 0;
+    if(reg.level==1){            //level 1
+        choose_level_LED[0] = 1; 
+    } else if(reg.level==2) {    //level 2
+        choose_level_LED[1] = 1; 
+    } else if(reg.level==3) {    //level 3
+        choose_level_LED[2] = 1; 
+    } else{                      //either idle or win 
+      choose_level_LED[2] = 1;  
+      choose_level_LED[1] = 1;
+      choose_level_LED[0] = 1;
+    }
     
-    //INDICATORS
-    buzzer = 0; //passive buzzer for sound
-    timer_7seg[7] = 0; 
-    timer_7seg[6] = 0; 
-    timer_7seg[5] = 0; 
-    timer_7seg[4] = 0; 
-    timer_7seg[3] = 0; 
-    timer_7seg[2] = 0; 
-    timer_7seg[1] = 0; 
-    timer_7seg[0] = 0; 
+    //STAGE LEDS
+    if(reg.stage==0){           //idle
+      current_stage_LED[1] = 0; 
+      current_stage_LED[0] = 0; 
+    } else if(reg.stage==1) {   //stage1
+      current_stage_LED[1] = 0; 
+      current_stage_LED[0] = 1; 
+    } else if(reg.stage==2) {   //stage 2
+      current_stage_LED[1] = 1; 
+      current_stage_LED[0] = 0; 
+    } else{                     //win 
+      current_stage_LED[1] = 1; 
+      current_stage_LED[0] = 1; 
+    }
     
-    player1_grid_LED[8:0] = grid_buttons[8:0];
-    choose_level_LED[2:0] = choose_level_buttons[2:0];
+    //ERROR LED
+    error_LED = reg.error;
+    
+    //OTHER INDICATORS
+    buzzer = pass_buzz.out; //passive buzzer for sound
+    timer_7seg[6:0] = seven_seg_decoder.out;
   }
 }

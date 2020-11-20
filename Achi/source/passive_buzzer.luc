@@ -1,0 +1,34 @@
+module passive_buzzer (
+    input clk,  // clock
+    input rst,  // reset
+    input playing, //should there be a sound
+    input winLose, //1 is win, 0 is lose 
+    output out
+  ) {
+  //clock runs at 100MHz, div sets the counter to increment every 2^Div cycles
+  //winner Frequency at roughly 3000+Hz
+  //loser frequency at roughly 1000+Hz
+  
+  //honestly do not know if the div is ok, 2^15 cycles is roughly 3052Hz
+  counter winnerfrequencyCounter(#SIZE(1), #DIV(15), .clk(clk), .rst(rst)); 
+  //honestly do not know if the div is ok, 2^16 cycles is roughly 1526Hz
+  counter loserfrequencyCounter(#SIZE(1), #DIV(16), .clk(clk), .rst(rst)); 
+
+  edge_detector winnerfrequencyCounterDetector(#RISE(1), #FALL(0), .clk(clk));
+  edge_detector loserfrequencyCounterDetector(#RISE(1), #FALL(0), .clk(clk));
+  
+  always {
+    winnerfrequencyCounterDetector.in = winnerfrequencyCounter.value;
+    loserfrequencyCounterDetector.in = loserfrequencyCounter.value;
+    if(playing==1){
+      if(winLose==0){ //lose
+        out = loserfrequencyCounterDetector.out;
+      } else{ //win 
+        out = winnerfrequencyCounterDetector.out;
+      }
+    }
+    else{
+      out = 0;
+    }
+  }
+}

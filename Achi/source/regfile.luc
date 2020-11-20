@@ -1,18 +1,18 @@
 module regfile (
     input clk,  // clock
     input rst,  // reset
-    input ra[4],
-    input rb[4],
-    input rc[4],
+    input ra[5],
+    input rb[5],
+    input rc[5],
     input we,
     input data[16],
     output time[4],
     output error,
-    output level[2],
+    output level[3],
     output stage[2],
     output player[2],
     output miss[2][2],
-    output tiles[2][3],
+    output tiles[2][4],
     output pos[2][9],
     output ra_data[16],
     output rb_data[16]
@@ -25,7 +25,7 @@ module regfile (
   dff reg_tiles2[3](.clk(clk), .rst(rst));  // 0 - 4: number of tiles player2 has taken
   dff reg_player[2](.clk(clk), .rst(rst));  // reg_player[0]: player1's LED, reg_player[1]: player2's LED
   dff reg_time[4](.clk(clk), .rst(rst));    // 0 - 9: seconds, 15: no timing
-  dff reg_level[2](.clk(clk), .rst(rst));   // 0: idle/winning, 1: level1, 2: level2, 3: level3
+  dff reg_level[3](.clk(clk), .rst(rst));   // 0: idle/winning, 1: level1, 2: level2, 3: level3
   dff reg_stage[2](.clk(clk), .rst(rst));   // 0: idle, 1: stage1, 2: stage2, 3: winning
   dff reg_miss1[2](.clk(clk), .rst(rst));   // 0 - 2: number of misses of player1
   dff reg_miss2[2](.clk(clk), .rst(rst));   // 0 - 2: number of misses of player2
@@ -66,7 +66,7 @@ module regfile (
       4h4: ra_data[2:0] = reg_tiles2.q;
       4h5: ra_data[1:0] = reg_player.q;
       4h6: ra_data[3:0] = reg_time.q;
-      4h7: ra_data[1:0] = reg_level.q;
+      4h7: ra_data[2:0] = reg_level.q;
       4h8: ra_data[1:0] = reg_stage.q;
       4h9: ra_data[1:0] = reg_miss1.q;
       4hA: ra_data[1:0] = reg_miss2.q;
@@ -85,7 +85,7 @@ module regfile (
       4h4: rb_data[2:0] = reg_tiles2.q;
       4h5: rb_data[1:0] = reg_player.q;
       4h6: rb_data[3:0] = reg_time.q;
-      4h7: rb_data[1:0] = reg_level.q;
+      4h7: rb_data[2:0] = reg_level.q;
       4h8: rb_data[1:0] = reg_stage.q;
       4h9: rb_data[1:0] = reg_miss1.q;
       4hA: rb_data[1:0] = reg_miss2.q;

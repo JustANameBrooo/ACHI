@@ -2,17 +2,23 @@
 <project name="Achi" board="Alchitry Au" language="Lucid" version="3">
   <files>
     <src>multiplier.luc</src>
-    <src>adder.luc</src>
     <src top="true">au_top.luc</src>
     <src>regfile.luc</src>
-    <src>alu.luc</src>
-    <src>states.luc</src>
-    <component>reset_conditioner.luc</component>
     <src>mux2.luc</src>
-    <src>shifter.luc</src>
+    <src>passive_buzzer.luc</src>
     <src>control.luc</src>
     <src>comparator.luc</src>
+    <src>adder.luc</src>
+    <component>counter.luc</component>
+    <src>alu.luc</src>
+    <component>edge_detector.luc</component>
+    <src>states.luc</src>
+    <component>reset_conditioner.luc</component>
+    <src>shifter.luc</src>
+    <component>pipeline.luc</component>
+    <component>button_conditioner.luc</component>
     <src>boolean.luc</src>
+    <src>seven_segment_decoder.luc</src>
     <constraint>custom.acf</constraint>
     <constraint lib="true">au.xdc</constraint>
   </files>
