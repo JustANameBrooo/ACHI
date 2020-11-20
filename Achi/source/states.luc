@@ -1,9 +1,12 @@
 module states (
+    //Inputs to FSM
     input clk,  // clock
     input rst,  // reset
     input grid_in[9],
     input start[3],
     input rb_data[16],
+    
+    //Outputs from FSM
     output we,
     output ra[6],
     output rb[6],
@@ -11,17 +14,1555 @@ module states (
     output bsel,
     output asel,
     output wdsel,
-    output alufn[6]
+    output alufn[6],
+    
+    //Outputs to test
+    output statenumber[7]
   ) {
+   .clk(clk){
+      edge_detector timerdetector(#RISE(1), #FALL(0));
+    
+      .rst(rst){
+        counter slow_timer(#SIZE(1),#DIV(26)); // ~1 second  
+      
+        checkpossible checkpossible;  
+      }
+    }
+  
+  
+  .clk(clk){
+  fsm currentstate = {
+      IDLE, 
+      SETEASYTIME,
+      SETINTERMEDIATETIME,
+      SETADVANCEDTIME,
+      
+      RESET,
+      
+      UPDATEPLAYER1TURN,
+      
+      STAGE1IDLE, 
+      STAGE1CHECKVACANCYPART1,
+      STAGE1CHECKVACANCYPART2,
+      STAGE1BRANCHCHECKVACANCY,
+      STAGE1UPDATEVACANCY,
+      STAGE1CHECKTURN,
+      STAGE1BRANCHCHECKTURN,
+      STAGE1UPDATEPOS1,
+      STAGE1UPDATETILES1,
+      STAGE1CHECKPOSSIBLEPLAYER1,
+      STAGE1UPDATEPOS2,
+      STAGE1UPDATETILES2,
+      STAGE1CHECKPOSSIBLEPLAYER2,
+      STAGE1CHECKSTAGECHANGE,
+      STAGE1BRANCHCHECKSTAGECHANGE,
+      STAGE1UPDATETURN,
+      STAGE1RESETTIMER,
+      
+      CHANGETOSTAGE2,
+      STAGE2IDLE,
+      STAGE2CHECKTURN,
+      STAGE2BRANCHCHECKTURN,
+      STAGE2CHECKEXISTPOS1PART1,
+      STAGE2CHECKEXISTPOS1PART2,
+      STAGE2BRANCHCHECKEXITPOS1,
+      STAGE2CHECKEXISTPOS2PART1,
+      STAGE2CHECKEXISTPOS2PART2,
+      STAGE2BRANCHCHECKEXITPOS2,
+      STAGE2SAVECURRENTVACANTPOS,
+      STAGE2SAVEPOSSIBLEMOVES,
+      STAGE2CHECKMOVEPOSSIBLEPART1,
+      STAGE2CHECKMOVEPOSSIBLEPART2,
+      STAGE2BRANCHCHECKMOVEPOSSIBLE,
+      STAGE2REMOVEPOS1,
+      STAGE2ADDPOS1,
+      STAGE2REMOVEPOS2,
+      STAGE2ADDPOS2,
+      STAGE2ADDVAC,
+      STAGE2REMOVEVAC,
+      STAGE2CHECKPOSSIBLE,
+      STAGE2BRANCHECKPOSSIBLE,
+      STAGE2UPDATETURN,
+      STAGE2RESETTIMER,      
+             
+      TIMERCHECKIFZERO,
+      TIMERBRANCHCCHECKIFZERO,
+      TIMERDECREASE,
+      TIMERCHECKTURN,
+      TIMERBRANCHCHECKTURN,
+      TIMERCHECKMISS1,
+      TIMERBRANCHCHECKMISS1,
+      TIMERUPDATEMISS1,
+      TIMERCHECKMISS2,
+      TIMERBRANCHCHECKMISS2,
+      TIMERUPDATEMISS2,
+      TIMERUPDATETURN,
+      
+      
+      PLAYER1WIN,
+      PLAYER1WINSETSTAGE,
+      PLAYER2WIN,
+      PLAYER2WINSETSTAGE,
+      ERROR,
+      ENDERROR
+    };}
+    
+  dff resetcounter[4](.clk(clk), .rst(rst));
+  
+  //variables for convienience
+  var difficulty,currentplayer,currentstage;
+  var regvac, regpos1, regpos2, regtiles1, regtiles2, regplayer, regtime, reglevel, regstage, regmiss1, regmiss2, regerror, regdiff, 
+  regtemp1, regtemp2, regtemp3, regtemp4, regtemp5, regtemp6,regtemp7,regtemp8,regtemp9,regtemp10;
+  var aluadd, alusub, alucmpeq, alushl, alushr, alusra, aluand, alunor, alua, alub, aluor, aluxor, alucmplt, alucmple, aluignore;
+
 
   always {
+  //init some variable values
+    checkpossible.rb_data=rb_data;
+    currentplayer = 0;
+    currentstage = 0;
+    timerdetector.in = slow_timer.value; // 30 second timer detector
+    difficulty = 0; //0 in idle, 1 in easy mode, 2 in intermediate mode, 3 in hard mode
+    statenumber=0; 
+   
+  //regfile address for easy reference and maintenance
+    regvac = 6b000000;
+    regpos1 = 6b000001;
+    regpos2 = 6b000010;
+    regtiles1 = 6b000011;
+    regtiles2 = 6b000100;
+    regplayer = 6b000101;
+    regtime = 6b000110;
+    reglevel = 6b000111;
+    regstage = 6b001000;
+    regmiss1 = 6b001001;
+    regmiss2 = 6b001010;
+    regerror = 6b001011;
+    regtemp1 = 6b001100;
+    regtemp2 = 6b001101;
+    regtemp3 = 6b001110;
+    regtemp4 = 6b001111;
+    regtemp5 = 6b010000;
+    regtemp6 = 6b010001;
+    regtemp7 = 6b010010;
+    regtemp8 = 6b010011;
+    regtemp9 = 6b010100;
+    regtemp10 = 6b010101;
+    
+    
+    //to check with kevin for empty reg slot for regdiff
+    regdiff = 6b111111;
+    
+  //ALUFN functions for easy refeerence and maintenance
+    aluignore = 6b000000;
+    aluadd = 6b000000;
+    alusub = 6b000001;
+    aluand = 6b011000;
+    aluor = 6b011110;
+    aluxor = 6b010110;
+    alua = 6b011010;
+    alushl = 6b100000;
+    alushr = 6b100001;
+    alusra = 6b100011;
+    alucmpeq = 6b110011;
+    alucmplt = 6b110101;
+    alucmple = 6b110111;
+    
+    //to check what alufn for nor is
+    alunor = 6b000;
+    
+    //tocheck what the alufn for 'B' is
+    alub = 6b000000;
+    
+  //Initialising outputs to 0
     we = 0;
     ra = 0;
     rb = 0;
     rc = 0;
-    bsel = 0;
-    asel = 0;
-    wdsel = 0;
-    alufn = 0;
+    bsel = 4b0000;
+    asel = 4b0000;
+    wdsel = 4b0000;
+    alufn = 6b000000;
+    
+    if(difficulty== 0){
+      currentstate.d = currentstate.IDLE;
+      we = 0;
+      ra = 0;
+      rb = 0;
+      rc = 0;
+      bsel = 4b0000;
+      asel = 4b0000;
+      wdsel = 4b0000;
+      alufn = 6b000000;
+      
+      if(start[0]){
+            difficulty=1;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0010;
+            currentstate.d = currentstate.SETEASYTIME;
+          }
+          else if(start[1]){
+            difficulty=2;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0011;
+            currentstate.d = currentstate.SETINTERMEDIATETIME;
+          }
+          else if(start[2]){
+            difficulty=3;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0100;
+            currentstate.d = currentstate.SETADVANCEDTIME;
+          }}
+      
+    else{
+      case(currentstate.q){
+      
+        currentstate.IDLE:
+          statenumber = 7b1000000;
+          if(start[0]){
+            difficulty=1;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0010;
+            currentstate.d = currentstate.SETEASYTIME;
+          }
+          else if(start[1]){
+            difficulty=2;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0011;
+            currentstate.d = currentstate.SETINTERMEDIATETIME;
+          }
+          else if(start[2]){
+            difficulty=3;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0100;
+            currentstate.d = currentstate.SETADVANCEDTIME;
+          }
+          
+        currentstate.SETEASYTIME:
+          statenumber = 7b1000001;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regdiff;
+          bsel = 4b0000;
+          asel = 4b0001;
+          wdsel = 4b0000;
+          alufn = alua;
+          currentstate.d = currentstate.RESET;
+          
+        currentstate.SETEASYTIME:
+          statenumber = 7b1000010;      
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regdiff;
+          bsel = 4b0000;
+          asel = 4b0010;
+          wdsel = 4b0000;
+          alufn = alua;
+          currentstate.d = currentstate.RESET;
+          
+        currentstate.SETADVANCEDTIME:
+          statenumber = 7b1000011;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regdiff;
+          bsel = 4b0000;
+          asel = 4b0011;
+          wdsel = 4b0000;
+          alufn = alua;
+          currentstate.d = currentstate.RESET;
+          
+        //can change to combinational logic also
+        currentstate.RESET:
+          statenumber = 7b1000100;
+          currentplayer=0;
+          currentstage=0;
+          case(resetcounter.q){
+            4b0001:
+            //reset pos1
+              alufn = aluignore;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = 0;
+              rb = 0;
+              rc = regpos1;
+              wdsel = 4b0001;
+            4b0010:
+            //reset pos2
+              alufn = aluignore;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = 0;
+              rb = 0;
+              rc = regpos2;
+              wdsel = 4b0001;
+            4b0011:
+            //reset tiles1
+              alufn = aluignore;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = 0;
+              rb = 0;
+              rc = regtiles1;
+              wdsel = 4b1111;
+            4b0100:
+            //reset tiles2
+              alufn = aluignore;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = 0;
+              rb = 0;
+              rc = regtiles2;
+              wdsel = 4b1111;
+            4b0101:
+            //reset stage
+              alufn = aluignore;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = 0;
+              rb = 0;
+              rc = regstage;
+              wdsel = 4b0010;
+            4b0110:
+            //reset miss1
+              alufn = aluignore;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = 0;
+              rb = 0;
+              rc = regmiss1;
+              wdsel = 4b0100;
+            4b0111:
+            //reset miss2
+              alufn = aluignore;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = 0;
+              rb = 0;
+              rc = regmiss2;
+              wdsel = 4b0100;
+            4b1000:
+            //reset vacancies
+              alufn = aluignore;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = 0;
+              rb = 0;
+              rc = regvac;
+              wdsel = 4b0001;
+            4b1001:
+            //reset timer
+              alufn = alua;
+              asel = 4b0000;
+              bsel = 4b0000;
+              we = 1;
+              ra = regdiff;
+              rb = 0;
+              rc = regtime;
+              wdsel = 4b0000;
+              
+            4b1010:
+            currentstate.d = currentstate.UPDATEPLAYER1TURN;
+          }
+          
+        currentstate.UPDATEPLAYER1TURN:
+          statenumber = 7b1000101;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regplayer;
+          wdsel = 4b0001;
+          currentplayer = 1;
+          currentstage = 1;
+          currentstate.d = currentstate.STAGE1IDLE;
+          
+
+//STAGE 1 STARTED--------------------------------------------------------------------------------------------------------------------------------------------
+          
+        currentstate.STAGE1IDLE:
+          statenumber = 7b0000000;
+        //check if difficulty buttons pressed, if pressed, reset and start at that difficulty.
+          if(start[0]){
+            difficulty=1;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0010;
+            currentstate.d = currentstate.SETEASYTIME;
+          }
+          else if(start[1]){
+            difficulty=2;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0011;
+            currentstate.d = currentstate.SETINTERMEDIATETIME;
+          }
+          else if(start[2]){
+            difficulty=3;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0100;
+            currentstate.d = currentstate.SETADVANCEDTIME;}
+            
+            
+          //check if button on grid was pressed. if button pressed, store button. skip store button state in fsm
+          else if(grid_in[0]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0001;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          else if(grid_in[1]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0010;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          else if(grid_in[2]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0011;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          else if(grid_in[3]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0100;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          else if(grid_in[4]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0101;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          else if(grid_in[5]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0110;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          else if(grid_in[6]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0111;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          else if(grid_in[7]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b1000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          else if(grid_in[8]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b1001;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE1CHECKVACANCYPART1;
+          }
+          
+          if(timerdetector.out){currentstate.d = currentstate.TIMERCHECKIFZERO;}
+          
+        currentstate.STAGE1CHECKVACANCYPART1:
+          statenumber = 7b0000001;
+          alufn = aluand;
+          asel = 4b0000;
+          bsel = 4b1001;
+          we = 1;
+          ra = regvac;
+          rb = regtemp4;
+          rc = regtemp5;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1CHECKVACANCYPART2;
+        
+        currentstate.STAGE1CHECKVACANCYPART2:
+          statenumber = 7b0000010;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regtemp5;
+          rb = 0;
+          rc = regtemp6;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1BRANCHCHECKVACANCY;         
+          
+        currentstate.STAGE1BRANCHCHECKVACANCY:
+          statenumber = 7b0000011;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regtemp6;
+          rc = 0;
+          wdsel = 4b0000;
+          
+          if(rb_data ==1){
+            currentstate.d = currentstate.STAGE1UPDATEVACANCY;}
+          else if(rb_data==0){
+            currentstate.d = currentstate.ERROR;}
+
+        currentstate.STAGE1UPDATEVACANCY:
+          statenumber = 7b0000100;
+          alufn = aluadd;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regvac;
+          rb = regtemp4;
+          rc = regvac;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1CHECKTURN;
+          
+        currentstate.STAGE1CHECKTURN:
+          statenumber = 7b0000101;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regplayer;
+          rb = 0;
+          rc = regtemp7;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1BRANCHCHECKTURN;
+          
+        currentstate.STAGE1BRANCHCHECKTURN:
+          statenumber = 7b0000110;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regtemp7;
+          rc = 0;
+          wdsel = 4b0000;
+          if(rb_data ==1){
+            currentstate.d = currentstate.STAGE1UPDATEPOS1;}
+          else if(rb_data==0){
+            currentstate.d = currentstate.STAGE1UPDATEPOS2;}
+            
+        currentstate.STAGE1UPDATEPOS1:
+          statenumber = 7b0000111;
+          alufn = aluadd;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regpos1;
+          rb = regtemp4;
+          rc = regpos1;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1UPDATETILES1;
+          
+        currentstate.STAGE1UPDATETILES1:
+          statenumber = 7b0001000;
+          alufn = alushr;
+          asel = 4b0000;
+          bsel = 4b0010;
+          we = 1;
+          ra = regtiles1;
+          rb = 0;
+          rc = regtiles1;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1CHECKPOSSIBLEPLAYER1;
+        
+        currentstate.STAGE1UPDATEPOS2:
+          statenumber = 7b0001001;
+          alufn = aluadd;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regpos2;
+          rb = regtemp4;
+          rc = regpos2;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1UPDATETILES1;
+          
+        currentstate.STAGE1UPDATETILES2:
+          statenumber = 7b0001010;
+          alufn = alushr;
+          asel = 4b0000;
+          bsel = 4b0010;
+          we = 1;
+          ra = regtiles2;
+          rb = 0;
+          rc = regtiles2;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1CHECKPOSSIBLEPLAYER2;         
+
+        currentstate.STAGE1CHECKPOSSIBLEPLAYER1:
+          statenumber = 7b0001011;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regpos1;
+          rc = 0;
+          wdsel = 4b0000;
+          
+          if(checkpossible.winornot==1){
+            currentstate.d = currentstate.PLAYER1WIN; 
+          }
+          else{
+            currentstate.d = currentstate.STAGE1UPDATETURN;
+          }
+   
+        currentstate.STAGE1CHECKPOSSIBLEPLAYER2:
+          statenumber = 7b0001100;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regpos2;
+          rc = 0;
+          wdsel = 4b0000;
+          if(checkpossible.winornot==1){
+            currentstate.d = currentstate.PLAYER1WIN; 
+          }
+          else{
+            currentstate.d = currentstate.STAGE1UPDATETURN;
+          }
+         
+        currentstate.STAGE1UPDATETURN:
+          statenumber = 7b0001111;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regplayer;
+          if(currentplayer==1){
+            wdsel=4b0011;
+            currentplayer=2;}
+          else if(currentplayer==2){
+            wdsel=4b0010;
+            currentplayer=1;
+            currentstate.d = currentstate.STAGE1RESETTIMER;}
+            
+        currentstate.STAGE1RESETTIMER:
+          statenumber = 7b0010000;
+          alufn = alua;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regdiff;
+          rb = 0;
+          rc = regtime;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1CHECKSTAGECHANGE;
+          
+        currentstate.STAGE1CHECKSTAGECHANGE:
+          statenumber = 7b0001101;
+          alufn = alunor;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regtiles1;
+          rb = regtiles2;
+          rc = regtemp8;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE1BRANCHCHECKSTAGECHANGE; 
+          
+        currentstate.STAGE1BRANCHCHECKSTAGECHANGE:
+          statenumber = 7b0001110;
+          alufn = alunor;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regtiles1;
+          rb = regtiles2;
+          rc = regtemp8;
+          wdsel = 4b0000;
+          if(rb_data ==1){
+            currentstate.d = currentstate.CHANGETOSTAGE2;}
+          else if(rb_data==0){
+            currentstate.d = currentstate.STAGE1IDLE;}
+       
+          
+//TRANSITION TO STAGE 2----------------------------------------------------------------------------------------------------------------------------------------          
+        currentstate.CHANGETOSTAGE2:
+          statenumber = 7b1000110;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regstage;
+          wdsel = 4b0011;
+          currentstage=2;
+          currentstate.d = currentstate.STAGE2IDLE;
+          
+//STAGE 2 STARTED----------------------------------------------------------------------------------------------------------------------------------------------          
+        currentstate.STAGE2IDLE:
+          statenumber = 7b0100000;
+          
+          //check if difficulty buttons pressed, if pressed, reset and start at that difficulty.
+          if(start[0]){
+            difficulty=1;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0010;
+            currentstate.d = currentstate.SETEASYTIME;
+          }
+          else if(start[1]){
+            difficulty=2;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0011;
+            currentstate.d = currentstate.SETINTERMEDIATETIME;
+          }
+          else if(start[2]){
+            difficulty=3;
+            alufn = aluignore;
+            asel = 4b0000;
+            bsel = 4b0000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = reglevel;
+            wdsel = 4b0100;
+            currentstate.d = currentstate.SETADVANCEDTIME;}
+            
+            
+          //check if button on grid was pressed. if button pressed, store button. skip store button state in fsm
+          else if(grid_in[0]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0001;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          else if(grid_in[1]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0010;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          else if(grid_in[2]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0011;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          else if(grid_in[3]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0100;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          else if(grid_in[4]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0101;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          else if(grid_in[5]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0110;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          else if(grid_in[6]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b0111;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          else if(grid_in[7]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b1000;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          else if(grid_in[8]){
+            alufn = alub;
+            asel = 4b0000;
+            bsel = 4b1001;
+            we = 1;
+            ra = 0;
+            rb = 0;
+            rc = regtemp4;
+            wdsel = 4b0000;
+            currentstate.d = currentstate.STAGE2CHECKTURN;
+          }
+          
+          //slow timer corresponding to difficulty level chosen
+          if(timerdetector.out){currentstate.d = currentstate.TIMERCHECKIFZERO;}
+          
+        currentstate.STAGE2CHECKTURN:
+          statenumber = 7b0100001;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regplayer;
+          rb = 0;
+          rc = regtemp7;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2BRANCHCHECKTURN;
+          
+        currentstate.STAGE2BRANCHCHECKTURN:
+          statenumber = 7b0100010;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regtemp7;
+          rc = 0;
+          wdsel = 4b0000;
+          if(rb_data ==1){
+            currentstate.d = currentstate.STAGE2CHECKEXISTPOS1PART1;}
+          else if(rb_data==0){
+            currentstate.d = currentstate.STAGE2CHECKEXISTPOS2PART1;}
+            
+        currentstate.STAGE2CHECKEXISTPOS1PART1:
+          statenumber = 7b0100011;
+          alufn = aluand;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regpos1;
+          rb = regtemp4;
+          rc = regtemp5;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2CHECKEXISTPOS1PART2;
+          
+        currentstate.STAGE2CHECKEXISTPOS1PART2:
+          statenumber = 7b0100100;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regtemp5;
+          rb = 0;
+          rc = regtemp6;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2CHECKEXISTPOS1PART2;
+          
+        currentstate.STAGE2BRANCHCHECKEXITPOS1:
+          statenumber = 7b0100101;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = regtemp6;
+          rc = 0;
+          wdsel = 4b0000;
+          if(rb_data ==1){
+            currentstate.d = currentstate.ERROR;}
+          else if(rb_data==0){
+            currentstate.d = currentstate.STAGE2SAVECURRENTVACANTPOS;}  
+            
+          
+          
+        currentstate.STAGE2CHECKEXISTPOS2PART1:
+          statenumber = 7b0100110;
+          alufn = aluand;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regpos2;
+          rb = regtemp4;
+          rc = regtemp5;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2CHECKEXISTPOS1PART2;
+          
+        currentstate.STAGE2CHECKEXISTPOS2PART2:
+          statenumber = 7b0100111;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regtemp5;
+          rb = 0;
+          rc = regtemp6;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2CHECKEXISTPOS1PART2;
+          
+        currentstate.STAGE2BRANCHCHECKEXITPOS2:
+          statenumber = 7b0101000;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regtemp6;
+          rc = 0;
+          wdsel = 4b0000;
+          if(rb_data ==1){
+            currentstate.d = currentstate.ERROR;}
+          else if(rb_data==0){
+            currentstate.d = currentstate.STAGE2SAVECURRENTVACANTPOS;}
+                 
+       currentstate.STAGE2SAVECURRENTVACANTPOS:
+          statenumber = 7b0101001;
+          alufn = alunor;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regvac;
+          rb = 0;
+          rc = regtemp9;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVES;   
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVES:
+          statenumber = 7b0101010;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regtemp9;
+          rc = 0;
+          wdsel = 4b0000;
+          case(rb_data){
+            //vacancy at position 0
+            9b000000001:
+              alufn = alua;
+              asel = 4b0110;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;
+            //vacancy at position 1 
+            9b000000010:
+              alufn = alua;
+              asel = 4b0111;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;
+            //vacancy at position 2  
+            9b000000100:
+              alufn = alua;
+              asel = 4b1000;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;
+            //vacancy at position 3  
+            9b000001000:
+              alufn = alua;
+              asel = 4b1001;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;
+            //vacancy at position 4  
+            9b000010000:
+              alufn = alua;
+              asel = 4b1010;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;
+            //vacancy at position 5  
+            9b000100000:
+              alufn = alua;
+              asel = 4b1011;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;
+            //vacancy at position 6  
+            9b001000000:
+              alufn = alua;
+              asel = 4b1100;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;             
+            //vacancy at position 7  
+            9b010000000:
+              alufn = alua;
+              asel = 4b1101;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;
+            //vacancy at position 8  
+            9b100000000:
+              alufn = alua;
+              asel = 4b1110;
+              bsel = 4b0000;
+              we = 0;
+              ra = 0;
+              rb = 0;
+              rc = regtemp10;
+              wdsel = 4b0000;
+          }             
+           currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;                   
+          
+            
+       currentstate.STAGE2CHECKMOVEPOSSIBLEPART1:
+          statenumber = 7b0101011;
+          alufn = aluand;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regtemp10;
+          rb = regtemp4;
+          rc = regtemp7;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART2;          
+          
+      currentstate.STAGE2CHECKMOVEPOSSIBLEPART2:
+          statenumber = 7b0101100;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regtemp7;
+          rb = 0;
+          rc = regtemp10;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2BRANCHCHECKMOVEPOSSIBLE;    
+       
+      currentstate.STAGE2BRANCHCHECKMOVEPOSSIBLE:
+          statenumber = 7b0101101;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = regtemp10;
+          rc = 0;
+          wdsel = 4b0000;
+          if(rb_data == 1){currentstate.d = currentstate.ERROR;} 
+          else if(rb_data == 0){
+              if(currentplayer==1){currentstate.d = currentstate.STAGE2REMOVEPOS1;}
+              else if(currentplayer==2){currentstate.d = currentstate.STAGE2REMOVEPOS2;}}
+            
+        currentstate.STAGE2REMOVEPOS1:
+          statenumber = 7b0101110;
+          alufn = alusub;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regpos1;
+          rb = regtemp4;
+          rc = regpos1;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2ADDPOS1;  
+        
+        currentstate.STAGE2ADDPOS1:
+          statenumber = 7b0101111;
+          alufn = aluadd;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regpos1;
+          rb = regtemp9;
+          rc = regpos1;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2ADDVAC;  
+            
+        currentstate.STAGE2REMOVEPOS2:
+          statenumber = 7b0110000;
+          alufn = alusub;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regpos2;
+          rb = regtemp4;
+          rc = regpos2;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2ADDPOS2;  
+        
+        currentstate.STAGE2ADDPOS2:
+          statenumber = 7b0110001;
+          alufn = aluadd;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regpos2;
+          rb = regtemp9;
+          rc = regpos2;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2ADDVAC;          
+            
+        currentstate.STAGE2ADDVAC:
+          statenumber = 7b0110010;
+          alufn = aluadd;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regvac;
+          rb = regtemp9;
+          rc = regvac;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2ADDPOS2;  
+        
+        currentstate.STAGE2REMOVEVAC:
+          statenumber = 7b0110011;
+          alufn = alusub;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regvac;
+          rb = regtemp4;
+          rc = regvac;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2CHECKPOSSIBLE;                      
+             
+       currentstate.STAGE2CHECKPOSSIBLE:
+          statenumber = 7b0110100;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          if(currentplayer==1){rb = regpos1;}
+            else if(currentplayer==2){rb = regpos2;}
+          rc = 0;
+          wdsel = 4b0000;
+          if(checkpossible.winornot==1){
+            if(currentplayer==1){currentstate.d = currentstate.PLAYER1WIN;}
+            else if(currentplayer==2){currentstate.d = currentstate.PLAYER2WIN;}
+          }
+          else{
+            currentstate.d = currentstate.STAGE2UPDATETURN;
+          }  
+          
+        currentstate.STAGE2UPDATETURN:
+          statenumber = 7b0001111;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regplayer;
+          if(currentplayer==1){
+            wdsel=4b0011;
+            currentplayer=2;}
+          else if(currentplayer==2){
+            wdsel=4b0010;
+            currentplayer=1;
+            currentstate.d = currentstate.STAGE2RESETTIMER;}
+            
+        currentstate.STAGE2RESETTIMER:
+          statenumber = 7b0010000;
+          alufn = alua;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = regdiff;
+          rb = 0;
+          rc = regtime;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.STAGE2IDLE;  
+          
+//Utils states ----------------------------------------------------------------------------------------------------------------------------------------------                  
+        currentstate.ERROR:
+          statenumber = 7b1000111;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regerror;
+          wdsel = 4b0010;
+          currentstate.d = currentstate.ENDERROR;
+          
+        currentstate.ENDERROR:
+          statenumber = 7b1001000;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regerror;
+          wdsel = 4b0001;
+          if(currentstage == 1){currentstate.d = currentstate.STAGE1IDLE;}
+          else if(currentstage == 2){currentstate.d = currentstate.STAGE2IDLE;}
+          
+        currentstate.PLAYER1WIN: 
+          statenumber = 7b1001001;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regplayer;
+          wdsel=4b0010;
+          currentstate.d = currentstate.PLAYER1WINSETSTAGE;
+          
+        currentstate.PLAYER1WINSETSTAGE: 
+          statenumber = 7b1001001;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regstage;
+          wdsel=4b0001;
+          currentplayer= 0;
+          currentstage = 0;
+          currentstate.d = currentstate.IDLE;     
+          
+        currentstate.PLAYER2WIN:
+          statenumber = 7b1001010;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regplayer;
+          wdsel=4b0011;
+          currentstate.d = currentstate.PLAYER2WINSETSTAGE; 
+          
+        currentstate.PLAYER2WINSETSTAGE: 
+          statenumber = 7b1001010;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regstage;
+          wdsel=4b0001;
+          currentplayer= 0;
+          currentstage = 0;          
+          currentstate.d = currentstate.IDLE;           
+          
+//TIMER AND MISS STUFF --------------------------------------------------------------------------------------------------------------------------------------
+                    
+        currentstate.TIMERCHECKIFZERO:
+          statenumber = 7b1100000;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regtime;
+          rb = 0;
+          rc = regtemp1;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.TIMERBRANCHCCHECKIFZERO;
+          
+        currentstate.TIMERBRANCHCCHECKIFZERO:
+          statenumber = 7b1100001;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regtemp1;
+          rc = 0;
+          wdsel = 4b0000;
+          if(rb_data ==1){
+            if(currentplayer == 1){
+              currentstate.d = currentstate.TIMERCHECKMISS1;}
+            else if(currentplayer == 2){
+              currentstate.d = currentstate.TIMERCHECKMISS2;}  
+            }
+          else if(rb_data==0){
+            currentstate.d = currentstate.TIMERDECREASE;}  
+                   
+        currentstate.TIMERDECREASE:
+          statenumber = 7b1100010;
+          alufn = alusub;
+          asel = 4b0000;
+          bsel = 4b0010;
+          we = 1;
+          ra = regtime;
+          rb = 0;
+          rc = regtime;
+          wdsel = 4b0000;
+          if(currentstage == 1){
+            currentstate.d = currentstate.STAGE1IDLE;}
+          else if(currentstage == 2){
+            currentstate.d = currentstate.STAGE2IDLE;}
+        
+        //if is player 1 turn 
+              
+        currentstate.TIMERCHECKMISS1:
+          statenumber = 7b1100011;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regmiss1;
+          rb = 0;
+          rc = regtemp2;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.TIMERBRANCHCHECKMISS1;
+          
+        currentstate.TIMERBRANCHCHECKMISS1:
+          statenumber = 7b1100100;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regtemp2;
+          rc = 0;
+          wdsel = 4b0000;
+          if(rb_data ==1){
+            currentstate.d = currentstate.PLAYER2WIN;}
+          else if(rb_data==0){
+            currentstate.d = currentstate.TIMERUPDATEMISS1;}
+            
+        currentstate.TIMERUPDATEMISS1:
+          statenumber = 7b1100101;
+          alufn = alushr;
+          asel = 4b0000;
+          bsel = 4b0010;
+          we = 1;
+          ra = regmiss1;
+          rb = 0;
+          rc = regmiss1;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.TIMERUPDATETURN;  
+          
+         //if is player 2 turn                  
+          
+        currentstate.TIMERCHECKMISS2:
+          statenumber = 7b1100110;
+          alufn = alucmpeq;
+          asel = 4b0000;
+          bsel = 4b0001;
+          we = 1;
+          ra = regmiss2;
+          rb = 0;
+          rc = regtemp2;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.TIMERBRANCHCHECKMISS2;
+          
+        currentstate.TIMERBRANCHCHECKMISS2:
+          statenumber = 7b1100111;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 0;
+          ra = 0;
+          rb = regtemp2;
+          rc = 0;
+          wdsel = 4b0000;
+          if(rb_data ==1){
+            currentstate.d = currentstate.PLAYER1WIN;}
+          else if(rb_data==0){
+            currentstate.d = currentstate.TIMERUPDATEMISS2;}
+            
+        currentstate.TIMERUPDATEMISS2:
+          statenumber = 7b1101000;
+          alufn = alushr;
+          asel = 4b0000;
+          bsel = 4b0010;
+          we = 1;
+          ra = regmiss2;
+          rb = 0;
+          rc = regmiss2;
+          wdsel = 4b0000;
+          currentstate.d = currentstate.TIMERUPDATETURN;
+                    
+        currentstate.TIMERUPDATETURN:
+          statenumber = 7b1101001;
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regplayer;
+          if(currentplayer == 1){
+              wdsel = 4b0010;}
+          else if(currentplayer == 2){
+              wdsel = 4b0011;}
+          if(currentstage ==1){
+            currentstate.d = currentstate.STAGE1IDLE;}
+          else if(currentstage==2){
+            currentstate.d = currentstate.STAGE2IDLE;}
+
+      }
+      
+    
+    
   }
+  
 }
