@@ -1,11 +1,11 @@
 module control (
-    input clk,  // clock
-    input rst,  // reset
+    //input clk,  // clock
+    //input rst,  // reset
     input ra_data[16],
     input rb_data[16],
-    input asel[11],
-    input bsel[9],
-    input wdsel[14],
+    input asel[4],
+    input bsel[4],
+    input wdsel[4],
     input alufn[6],
     output data[16]
   ) {
@@ -15,7 +15,7 @@ module control (
   always {
   
     //ALU
-    alu.alufn = alufn;                  
+    alu.alufn = alufn;
     alu.a = ra_data;
     alu.b = rb_data;
     data = alu.out;
@@ -23,32 +23,32 @@ module control (
     //asel mux
     case(asel){
       b0000  : alu.a = ra_data;
-      b0001  : alu.a = 0; //Easy mode time(no time)
-      b0010  : alu.a = b1000; //Intermediate mode time 8 seconds
-      b0011  : alu.a = b101; //Advanced mode time 5 seconds
-      b0100  : alu.a = b000000111; //Possible 1(0,1,2)
-      b0101  : alu.a = b100010001; //Possible 2(0,4,8)
-      b0110  : alu.a = b000111000; //Possible 3(3,4,5)
-      b0111  : alu.a = b111000000; //Possible 4(6,7,8)
-      b1000  : alu.a = b001010100; //Possible 5(2,4,6)
-      b1001  : alu.a = b001001001; //Possible 6(0,3,6)
-      b1010  : alu.a = b010010010; //Possible 7(1,4,7)
-      b1011  : alu.a = b100100100; //Possible 8(2,5,8)
+      b0001  : alu.a = 16d0; //Easy mode time(no time)
+      b0010  : alu.a = 16d8; //Intermediate mode time 8 seconds
+      b0011  : alu.a = 16d5; //Advanced mode time 5 seconds
+      b0100  : alu.a = 16b000000111; //Possible 1(0,1,2)
+      b0101  : alu.a = 16b100010001; //Possible 2(0,4,8)
+      b0110  : alu.a = 16b000111000; //Possible 3(3,4,5)
+      b0111  : alu.a = 16b111000000; //Possible 4(6,7,8)
+      b1000  : alu.a = 16b001010100; //Possible 5(2,4,6)
+      b1001  : alu.a = 16b001001001; //Possible 6(0,3,6)
+      b1010  : alu.a = 16b010010010; //Possible 7(1,4,7)
+      b1011  : alu.a = 16b100100100; //Possible 8(2,5,8)
       default : alu.a = ra_data;
     }
     
     //bsel mux
     case(bsel){
       b0000  : alu.b = rb_data;
-      b0001  : alu.b = b00000000; //ZERO
-      b0010  : alu.b = b00000001; //ONE
-      b0011  : alu.b = b00000010; //TWO
-      b0100  : alu.b = b00000100; //THREE
-      b0101  : alu.b = b00001000; //FOUR
-      b0110  : alu.b = b00010000; //FIVE
-      b0111  : alu.b = b00100000; //SIX
-      b1000  : alu.b = b01000000; //SEVEN
-      b1001  : alu.b = b10000000; //EIGHT
+      b0001  : alu.b = 16b00000000; //ZERO
+      b0010  : alu.b = 16b00000001; //ONE
+      b0011  : alu.b = 16b00000010; //TWO
+      b0100  : alu.b = 16b00000100; //THREE
+      b0101  : alu.b = 16b00001000; //FOUR
+      b0110  : alu.b = 16b00010000; //FIVE
+      b0111  : alu.b = 16b00100000; //SIX
+      b1000  : alu.b = 16b01000000; //SEVEN
+      b1001  : alu.b = 16b10000000; //EIGHT
       default: alu.b = rb_data;
       
     }
