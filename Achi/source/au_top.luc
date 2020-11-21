@@ -91,13 +91,13 @@ module au_top (
     //passive_buzzer inputs
     if(reg.stage==3){        //someone won
       pass_buzz.playing =1;
-      pass_buzz.winLose =1;
+      pass_buzz.winError =1;
     } else if(reg.error==1){ //error
       pass_buzz.playing =1;
-      pass_buzz.winLose =0;
+      pass_buzz.winError =0;
     } else {                 //no sound
       pass_buzz.playing =0;
-      pass_buzz.winLose =0;
+      pass_buzz.winError =0;
     }
     
     //direct connection to the outputs
@@ -179,6 +179,6 @@ module au_top (
     
     //OTHER INDICATORS
     buzzer = pass_buzz.out; //passive buzzer for sound
-    timer_7seg[6:0] = seven_seg_decoder.out;
+    timer_7seg[6:0] = ~seven_seg_decoder.out; //common cathod 7-seg
   }
 }
