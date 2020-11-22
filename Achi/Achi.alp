@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Achi" board="Alchitry Au" language="Lucid" version="3">
   <files>
-    <src>states.luc</src>
-    <component>reset_conditioner.luc</component>
-    <src>alu.luc</src>
-    <src>multiplier.luc</src>
-    <src>comparator.luc</src>
-    <src>regfile.luc</src>
-    <src>adder.luc</src>
-    <src>mux2.luc</src>
-    <src>boolean.luc</src>
-    <src top="true">au_top.luc</src>
     <src>shifter.luc</src>
+    <src>mux2.luc</src>
+    <src>comparator.luc</src>
     <src>control.luc</src>
-    <constraint lib="true">au.xdc</constraint>
+    <src>adder.luc</src>
+    <src>states.luc</src>
+    <src>checkpossible.luc</src>
+    <src>alu.luc</src>
+    <src>regfile.luc</src>
+    <src top="true">au_top.luc</src>
+    <src>multiplier.luc</src>
+    <component>reset_conditioner.luc</component>
+    <src>boolean.luc</src>
     <constraint lib="true">alchitry.acf</constraint>
+    <constraint lib="true">au.xdc</constraint>
   </files>
 </project>
