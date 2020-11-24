@@ -28,7 +28,7 @@ module au_top (
   
   states statemachine(.clk(clk), .rst(rst));
   regfile reg(.clk(clk), .rst(rst));
-  control ctrl(.clk(clk), .rst(rst));  
+  control ctrl;  
   
   seven_segment_decoder seven_seg_decoder;
   

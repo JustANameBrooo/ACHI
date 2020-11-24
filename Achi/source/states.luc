@@ -24,10 +24,10 @@ module states (
     
       .rst(rst){
         counter slow_timer(#SIZE(1),#DIV(26)); // ~1 second  
-      
-        checkpossible checkpossible;  
       }
     }
+    checkpossible checkpossible;  
+
   
   
   .clk(clk){
