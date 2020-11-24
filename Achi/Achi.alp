@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Achi" board="Alchitry Au" language="Lucid" version="3">
   <files>
-    <src>checkpossible.luc</src>
     <src>multiplier.luc</src>
     <src top="true">au_top.luc</src>
     <src>regfile.luc</src>
@@ -17,6 +16,7 @@
     <component>reset_conditioner.luc</component>
     <src>shifter.luc</src>
     <component>pipeline.luc</component>
+    <src>checkpossible.luc</src>
     <component>button_conditioner.luc</component>
     <src>boolean.luc</src>
     <src>seven_segment_decoder.luc</src>
