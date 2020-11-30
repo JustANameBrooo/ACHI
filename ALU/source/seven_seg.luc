@@ -1,0 +1,25 @@
+module seven_seg (
+    input char[4],
+    output segs[7]
+  ) {
+
+  always {
+    case (char) {
+      0: segs = 7b1110111;  // A
+      1: segs = 7b1111100;  // b
+      2: segs = 7b0111001;  // C
+      3: segs = 7b1011110;  // d
+      4: segs = 7b1110001;  // F
+      5: segs = 7b0110000;  // l
+      6: segs = 7b1011100;  // o
+      7: segs = 7b1110011;  // P
+      8: segs = 7b1010000;  // r
+      9: segs = 7b1101101;  // S
+      10: segs = 7b1111000; // t
+      11: segs = 7b0011100; // u
+      12: segs = 7b1010101; // M
+      13: segs = 7b1111001; // E
+      default: segs = 7b0000000;
+    }
+  }
+}

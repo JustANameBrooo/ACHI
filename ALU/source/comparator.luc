@@ -1,0 +1,30 @@
+module comparator (
+    //input clk,  // clock
+    //input rst,  // reset
+    input alufn2,
+    input alufn1,
+    input z,
+    input n,
+    input v,
+    output out[16]
+  ) {
+
+  always {
+  out[15:1] = 0;
+  case(alufn2){
+      b0:
+        case(alufn1){
+          b1: out[0] = z; //A=B
+          default:
+            out[0] = 0;
+         }
+      b1:
+        case(alufn1){
+          b0: out[0] = n ^ v; //A < B
+          b1: out[0] = z | (n ^ v); //A<=B
+          }
+      default:
+        out[0] = 0;
+      }
+  }
+}

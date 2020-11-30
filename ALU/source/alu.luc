@@ -1,0 +1,61 @@
+module alu (  // 16 bit ALU unit
+    // input clk,  // clock
+    // input rst,  // reset
+    input alufn[6],
+    input a[16],
+    input b[16],
+    output out[16]
+  ) {
+  
+  // alu modules go here
+  comparator cmp;
+  adder add;
+  shifter shift;
+  boolean bool;
+  multiplier mult;
+  always {
+    // adder
+    add.alufn0 = alufn[0];
+    add.a = a;
+    add.b = b;
+    // boolean
+    bool.alufn = alufn[3:0];
+    bool.a = a;
+    bool.b = b;
+    // comparator
+    cmp.alufn2 = alufn[2];
+    cmp.alufn1 = alufn[1];
+    cmp.z = b0;
+    cmp.n = b0;
+    cmp.v = b0;
+    // shifter
+    shift.alufn0 = alufn[0];
+    shift.alufn1 = alufn[1];
+    shift.a = a;
+    shift.b = b[3:0];
+    // multiplier
+    mult.a = a;
+    mult.b = b;
+
+    case (alufn[5]) {
+      b0:
+        case (alufn[4]) {
+          b0: 
+            if (alufn[1]==b0) out = add.out; // add/sub
+            else out = mult.out; // multiplier
+          b1: out = bool.out; // bool
+        }
+      b1:
+        case (alufn[4]) {
+          b0: out = shift.out; // shift 
+          b1: 
+            // assign z, n, v from adder to comparator
+            cmp.z = add.z; 
+            cmp.n = add.n;
+            cmp.v = add.v;
+            out = cmp.out; // cmp 
+       }
+   }
+  }
+}
+

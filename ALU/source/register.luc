@@ -1,0 +1,135 @@
+//the regfile for all game information
+module register (
+    input clk,  // clock
+    input rst,  // reset
+    input write_address[4], // write address c
+    input we, // write enable
+    input data[16], // data in
+    input read_address_a[4], //address port a 
+    input read_address_b[4], //address port b
+    output out_a[16], //read port a
+    output out_b[16] //read port b
+   
+  ) 
+
+{
+  .clk(clk){
+    .rst(rst){
+      dff reg_vac[9];
+      dff reg_pos1[9];
+      dff reg_pos2[9];
+      dff reg_tiles_1[4];
+      dff reg_tiles_2[4];
+      dff reg_turn;
+      dff reg_winner[2];
+      dff reg_time[16];
+      dff reg_level[2];
+      dff reg_stage[2];
+      dff reg_miss1[2];
+      dff reg_miss2[2];
+      dff reg_error;
+      /* not needed (can be determine via separate modules by implementing cases?)
+      dff reg_possible1[16]; //8 different possible winning combinations (Possible1-8) 
+      dff reg_possible2[16];
+      dff reg_possible3[16];
+      dff reg_possible4[16];
+      dff reg_possible5[16];
+      dff reg_possible6[16];
+      dff reg_possible7[16];
+      dff reg_possible8[16]; 
+      dff reg_edges0[16]; //Which vertex is connected to which other vertices
+      dff reg_edges1[16];
+      dff reg_edges2[16];
+      dff reg_edges3[16];
+      dff reg_edges4[16];
+      dff reg_edges5[16];
+      dff reg_edges6[16];
+      dff reg_edges7[16];
+      */
+    }
+  }
+
+  always {
+  
+    //write port
+    if (we){
+      case(write_address){
+        h00 : reg_vac.d = data;
+        h01 : reg_pos1.d = data;
+        h02 : reg_pos2.d = data;
+        h03 : reg_tiles_1.d = data;
+        h04 : reg_tiles_2.d = data;
+        h05 : reg_turn.d = data;
+        h06 : reg_winner.d = data;
+        h07 : reg_time.d = data;
+        h08 : reg_level.d = data;
+        h09 : reg_stage.d = data;
+        h0A : reg_miss1.d = data;
+        h0B : reg_miss2.d = data;
+        h0C : reg_error.d = data;
+        /*
+        h0D : temp_var.d = data;
+        h0E : temp_var.d = data;
+        h0F : temp_var.d = data;
+        h010 : temp_var.d = data;
+        h011 : temp_var.d = data;
+        h012 : temp_var.d = data;
+        h013 : temp_var.d = data;
+        h014 : temp_var.d = data;
+        h015 : temp_var.d = data;
+        h016 : temp_var.d = data;
+        h017 : temp_var.d = data;
+        h018 : temp_var.d = data;
+        h019 : temp_var.d = data;
+        h01A : temp_var.d = data;
+        h01B : temp_var.d = data;
+        h01C : temp_var.d = data;
+        h01D : temp_var.d = data;
+        h01E : temp_var.d = data;
+        */
+      }
+    }
+    
+      
+    //read port a
+    case(read_address_a){
+        h00 : out_a = reg_vac.q;
+        h01 : out_a = reg_pos1.q; 
+        h02 : out_a = reg_pos2.q;
+        h03 : out_a = reg_tiles_1.q; 
+        h04 : out_a = reg_tiles_2.q; 
+        h05 : out_a = reg_turn.q; 
+        h06 : out_a = reg_winner.q; 
+        h07 : out_a = reg_time.q; 
+        h08 : out_a = reg_level.q; 
+        h09 : out_a = reg_stage.q;
+        h0A : out_a = reg_miss1.q; 
+        h0B : out_a = reg_miss2.q; 
+        h0C : out_a = reg_error.q; 
+        default : out_a = 0;
+    }
+    
+    //read port b
+    case(read_address_b){
+        h00 : out_b = reg_vac.q;
+        h01 : out_b = reg_pos1.q; 
+        h02 : out_b = reg_pos2.q;
+        h03 : out_b = reg_tiles_1.q; 
+        h04 : out_b = reg_tiles_2.q; 
+        h05 : out_b = reg_turn.q; 
+        h06 : out_b = reg_winner.q; 
+        h07 : out_b = reg_time.q; 
+        h08 : out_b = reg_level.q; 
+        h09 : out_b = reg_stage.q;
+        h0A : out_b = reg_miss1.q; 
+        h0B : out_b = reg_miss2.q; 
+        h0C : out_b = reg_error.q; 
+        default : out_b = 0;
+    }
+      
+    
+    
+    //For debugging
+
+  }
+}

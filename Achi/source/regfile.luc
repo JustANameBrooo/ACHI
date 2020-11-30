@@ -1,0 +1,139 @@
+module regfile (
+    input clk,  // clock
+    input rst,  // reset
+    input ra[6],
+    input rb[6],
+    input rc[6],
+    input we,
+    input data[16],
+    output out_time[4],
+    output error,
+    output level[3],
+    output stage[2],
+    output player[2],
+    output miss[2][2],
+    output tiles[2][4],
+    output pos[2][9],
+    output ra_data[16],
+    output rb_data[16],
+    output reg8[16],
+    output vac[9]
+  ) {
+
+  dff reg_vac[9](.clk(clk), .rst(rst));     // for each tile 0 - 8: 1 for vacant, 0 for occupied
+  dff reg_pos1[9](.clk(clk), .rst(rst));    // for each tile 0 - 8: 0 for not player1, 1 for player1
+  dff reg_pos2[9](.clk(clk), .rst(rst));    // for each tile 0 - 8: 0 for not player2, 1 for player1
+  dff reg_tiles1[4](.clk(clk), .rst(rst));  // 0 - 4: number of tiles player1 has taken
+  dff reg_tiles2[4](.clk(clk), .rst(rst));  // 0 - 4: number of tiles player2 has taken
+  dff reg_player[2](.clk(clk), .rst(rst));  // reg_player[0]: player1's LED, reg_player[1]: player2's LED
+  dff reg_time[4](.clk(clk), .rst(rst));    // 0 - 9: seconds, 15: no timing
+  dff reg_level[3](.clk(clk), .rst(rst));   // 0: idle/winning, 1: level1, 2: level2, 3: level3
+  dff reg_stage[2](.clk(clk), .rst(rst));   // 0: idle, 1: stage1, 2: stage2, 3: winning
+  dff reg_miss1[2](.clk(clk), .rst(rst));   // 0 - 2: number of misses of player1
+  dff reg_miss2[2](.clk(clk), .rst(rst));   // 0 - 2: number of misses of player2
+  dff reg_error(.clk(clk), .rst(rst));      // 0: no error, 1: error
+  dff reg_temp[11][16](.clk(clk), .rst(rst));//10 temporary 16-bit registers
+  dff reg_diff[4](.clk(clk), .rst(rst));    // To hold the number of seconds correponding to prev chosen difficulty
+  
+  always {
+    
+    ra_data = 16h0000;
+    rb_data = 16h0000;
+    
+    if (we) {
+      case (rc) {
+        5h00: reg_vac.d = data[8:0];
+        5h01: reg_pos1.d = data[8:0];
+        5h02: reg_pos2.d = data[8:0];
+        5h03: reg_tiles1.d = data[3:0];
+        5h04: reg_tiles2.d = data[3:0];
+        5h05: reg_player.d = data[1:0];
+        5h06: reg_time.d = data[3:0];
+        6h07: reg_level.d = data[1:0];
+        5h08: reg_stage.d = data[1:0];
+        5h09: reg_miss1.d = data[1:0];
+        5h0A: reg_miss2.d = data[1:0];
+        5h0B: reg_error.d = data[0];
+        5h0C: reg_temp.d[0] = data;
+        5h0D: reg_temp.d[1] = data;
+        5h0E: reg_temp.d[2] = data;
+        5h0F: reg_temp.d[3] = data;
+        5h10: reg_temp.d[4] = data;
+        5h11: reg_temp.d[5] = data;
+        5h12: reg_temp.d[6] = data;
+        5h13: reg_temp.d[7] = data;
+        5h14: reg_temp.d[8] = data;
+        5h15: reg_temp.d[9] = data;
+        5h16: reg_temp.d[10] = data;
+        5h17: reg_diff.d = data[3:0];
+      }
+    }
+    
+    case (ra) {
+      5h00: ra_data[8:0] = reg_vac.q;
+      5h01: ra_data[8:0] = reg_pos1.q;
+      5h02: ra_data[8:0] = reg_pos2.q;
+      5h03: ra_data[3:0] = reg_tiles1.q;
+      5h04: ra_data[3:0] = reg_tiles2.q;
+      5h05: ra_data[1:0] = reg_player.q;
+      5h06: ra_data[3:0] = reg_time.q;
+      5h07: ra_data[2:0] = reg_level.q;
+      5h08: ra_data[1:0] = reg_stage.q;
+      5h09: ra_data[1:0] = reg_miss1.q;
+      5h0A: ra_data[1:0] = reg_miss2.q;
+      5h0B: ra_data[0] = reg_error.q;
+      5h0C: ra_data = reg_temp.q[0];
+      5h0D: ra_data = reg_temp.q[1];
+      5h0E: ra_data = reg_temp.q[2];
+      5h0F: ra_data = reg_temp.q[3];
+      5h10: ra_data = reg_temp.q[4];
+      5h11: ra_data = reg_temp.q[5];
+      5h12: ra_data = reg_temp.q[6];
+      5h13: ra_data = reg_temp.q[7];
+      5h14: ra_data = reg_temp.q[8];
+      5h15: ra_data = reg_temp.q[9];
+      5h16: ra_data = reg_temp.q[10];
+      5h17: ra_data = reg_diff.q;
+    }
+    
+    case (rb) {
+      5h00: rb_data[8:0] = reg_vac.q;
+      5h01: rb_data[8:0] = reg_pos1.q;
+      5h02: rb_data[8:0] = reg_pos2.q;
+      5h03: rb_data[3:0] = reg_tiles1.q;
+      5h04: rb_data[3:0] = reg_tiles2.q;
+      5h05: rb_data[1:0] = reg_player.q;
+      5h06: rb_data[3:0] = reg_time.q;
+      5h07: rb_data[2:0] = reg_level.q;
+      5h08: rb_data[1:0] = reg_stage.q;
+      5h09: rb_data[1:0] = reg_miss1.q;
+      5h0A: rb_data[1:0] = reg_miss2.q;
+      5h0B: rb_data[0] = reg_error.q;
+      5h0C: rb_data = reg_temp.q[0];
+      5h0D: rb_data = reg_temp.q[1];
+      5h0E: rb_data = reg_temp.q[2];
+      5h0F: rb_data = reg_temp.q[3];
+      5h10: rb_data = reg_temp.q[4];
+      5h11: rb_data = reg_temp.q[5];
+      5h12: rb_data = reg_temp.q[6];
+      5h13: rb_data = reg_temp.q[7];
+      5h14: rb_data = reg_temp.q[8];
+      5h15: rb_data = reg_temp.q[9];
+      5h16: rb_data = reg_temp.q[10];
+      5h17: rb_data = reg_diff.q;
+    }
+    reg8 = reg_temp.q[7];
+    pos[0] = reg_pos1.q;
+    pos[1] = reg_pos2.q;
+    tiles[0] = reg_tiles1.q;
+    tiles[1] = reg_tiles2.q;
+    player = reg_player.q;
+    out_time = reg_time.q;
+    level = reg_level.q;
+    stage = reg_stage.q;
+    miss[0] = reg_miss1.q;
+    miss[1] = reg_miss2.q;
+    error = reg_error.q;
+    vac = reg_vac.q;
+  }
+}
