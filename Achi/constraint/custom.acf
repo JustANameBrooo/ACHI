@@ -37,7 +37,7 @@ pin player1_turn_LED A49;
 //****************************************************************
 //PLAYER 2 PINS
 //3rd row of Bank A and first element of row 4 from the left 
-pin player2_grid_LED[0] A24;
+pin player2_grid_LED[0] A24;  //Use Bank B
 pin player2_grid_LED[1] A21;
 pin player2_grid_LED[2] A18;
 pin player2_grid_LED[3] A15;
@@ -94,12 +94,13 @@ pin timer_7seg[5] B8;
 pin timer_7seg[6] B5;
 pin timer_7seg[7] B2;
 
-
-
+// x o x
+// o x 
+// o x o
 //****************************************************************
 //BUTTONS
-//first row of Bank B and first element of row 2 from the left 
-pin grid_buttons[0] B27 pullup;
+//first row of Bank B and first element of row 2 from the left `
+pin grid_buttons[0] B27 pullup; //use Bank D
 pin grid_buttons[1] B30 pullup;
 pin grid_buttons[2] B33 pullup;
 pin grid_buttons[3] B36 pullup;
@@ -107,17 +108,17 @@ pin grid_buttons[4] B39 pullup;
 pin grid_buttons[5] B42 pullup;
 pin grid_buttons[6] B45 pullup;
 pin grid_buttons[7] B48 pullup;
-pin grid_buttons[8] C9 pullup;
+pin grid_buttons[8] B28 pullup; //oldc9
  
 //second row of Bank B 2nd to 4th element of row 2 from the right
 pin choose_level_buttons[0] B43 pullup;
-pin choose_level_buttons[1] B46 pullup;
+pin choose_level_buttons[1] C6 pullup;
 pin choose_level_buttons[2] B49 pullup;
 
 //pin for testing
 pin statenumber_led[0] C43;
 pin statenumber_led[1] C46;
-pin statenumber_led[2] C6;//49;
+pin statenumber_led[2] C49;//49;
 pin statenumber_led[3] C42;
 pin statenumber_led[4] C45;
 pin statenumber_led[5] C48;

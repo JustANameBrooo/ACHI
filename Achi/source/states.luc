@@ -80,7 +80,15 @@ module states (
       STAGE2BRANCHCHECKEXITPOS2,
       STAGE2SAVECURRENTVACANTPOS,
       STAGE2SAVEPOSSIBLEMOVES,
-      STAGE2SAVEPOSSIBLEMOVESPART2, //edited
+      STAGE2SAVEPOSSIBLEMOVESBR1,
+      STAGE2SAVEPOSSIBLEMOVESBR2,
+      STAGE2SAVEPOSSIBLEMOVESBR3,
+      STAGE2SAVEPOSSIBLEMOVESBR4,
+      STAGE2SAVEPOSSIBLEMOVESBR5,
+      STAGE2SAVEPOSSIBLEMOVESBR6,
+      STAGE2SAVEPOSSIBLEMOVESBR7,
+      STAGE2SAVEPOSSIBLEMOVESBR8,
+      STAGE2SAVEPOSSIBLEMOVESBR9,
       STAGE2CHECKMOVEPOSSIBLEPART1,
       STAGE2CHECKMOVEPOSSIBLEPART2,
       STAGE2BRANCHCHECKMOVEPOSSIBLE,
@@ -1031,9 +1039,9 @@ module states (
           
         currentstate.STAGE2CHECKEXISTPOS1PART2:
           statenumber = 7b0100100;
-          alufn = alucmplt;
+          alufn = alucmpeq;
           asel = 4b0000;
-          bsel = 4b0001;
+          bsel = 4b1010;
           we = 1;
           ra = regtemp5;
           rb = 0;
@@ -1072,9 +1080,9 @@ module states (
           
         currentstate.STAGE2CHECKEXISTPOS2PART2:
           statenumber = 7b0100111;
-          alufn = alucmplt;
+          alufn = alucmpeq;
           asel = 4b0000;
-          bsel = 4b0001;
+          bsel = 4b1010;
           we = 1;
           ra = regtemp5;
           rb = 0;
@@ -1098,8 +1106,7 @@ module states (
             currentstate.d = currentstate.STAGE2SAVECURRENTVACANTPOS;}
                  
        currentstate.STAGE2SAVECURRENTVACANTPOS:
-          statenumber = 7b0101001; 
-          //error starts here
+          statenumber = 7b0101001;
           alufn = alunor;
           asel = 4b0000;
           bsel = 4b1010;
@@ -1120,52 +1127,70 @@ module states (
           rb = regtemp9;
           rc = 0;
           wdsel = 4b0000;
-          currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESPART2; //edited  
+          case(rb_data[8:0]){
+            9b000000001: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR1;
+            9b000000010: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR2;
+            9b000000100: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR3;
+            9b000001000: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR4;
+            9b000010000: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR5;
+            9b000100000: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR6;
+            9b001000000: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR7;
+            9b010000000: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR8;
+            9b100000000: currentstate.d = currentstate.STAGE2SAVEPOSSIBLEMOVESBR9;
+            default: currentstate.d = currentstate.STAGE2IDLE;
+          }
+           //edited  
           
-      currentstate.STAGE2SAVEPOSSIBLEMOVESPART2: //edited 
-          case(rb_data){
-            //vacancy at position 0 
-            9b000000001:
-              alufn = aluignore;
-              asel = 4b0000;
-              bsel = 4b0000;
-              we = 1;
-              ra = 0;
-              rb = 0;
-              rc = regtemp10;
-              wdsel = 4b0110;
-            //vacancy at position 1 
-            9b000000010:
-              alufn = aluignore;
-              asel = 4b0111;
-              bsel = 4b0000;
-              we = 1;
-              ra = 0;
-              rb = 0;
-              rc = regtemp10;
-              wdsel = 4b0111;
-            //vacancy at position 2  
-            9b000000100:
-              alufn = aluignore;
-              asel = 4b1000;
-              bsel = 4b0000;
-              we = 1;
-              ra = 0;
-              rb = 0;
-              rc = regtemp10;
-              wdsel = 4b1000;
-            //vacancy at position 3  
-            9b000001000:
-              alufn = aluignore;
-              asel = 4b1001;
-              bsel = 4b0000;
-              we = 1;
-              ra = 0;
-              rb = 0;
-              rc = regtemp10;
-              wdsel = 4b1001;
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR1:
+          //vacancy at ppsition 0 
+          alufn = aluignore;
+          asel = 4b0000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regtemp10;
+          wdsel = 4b0110;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR2:
+          //vacancy at position 1 
+          alufn = aluignore;
+          asel = 4b0111;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regtemp10;
+          wdsel = 4b0111;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR3:
+          //vacancy at position 2  
+          alufn = aluignore;
+          asel = 4b1000;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regtemp10;
+          wdsel = 4b1000;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR4:
+          //vacancy at position 3  
+          alufn = aluignore;
+          asel = 4b1001;
+          bsel = 4b0000;
+          we = 1;
+          ra = 0;
+          rb = 0;
+          rc = regtemp10;
+          wdsel = 4b1001;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR5:
             //vacancy at position 4  
-            9b000010000:
               alufn = aluignore;
               asel = 4b1010;
               bsel = 4b0000;
@@ -1174,8 +1199,10 @@ module states (
               rb = 0;
               rc = regtemp10;
               wdsel = 4b1010;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR6:
             //vacancy at position 5  
-            9b000100000:
               alufn = aluignore;
               asel = 4b1011;
               bsel = 4b0000;
@@ -1184,8 +1211,10 @@ module states (
               rb = 0;
               rc = regtemp10;
               wdsel = 4b1011;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR7:
             //vacancy at position 6  
-            9b001000000:
               alufn = aluignore;
               asel = 4b1100;
               bsel = 4b0000;
@@ -1193,9 +1222,11 @@ module states (
               ra = 0;
               rb = 0;
               rc = regtemp10;
-              wdsel = 4b1100;             
+              wdsel = 4b1100;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR8:          
             //vacancy at position 7  
-            9b010000000:
               alufn = aluignore;
               asel = 4b1101;
               bsel = 4b0000;
@@ -1204,8 +1235,10 @@ module states (
               rb = 0;
               rc = regtemp10;
               wdsel = 4b1101;
+          currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;
+          
+      currentstate.STAGE2SAVEPOSSIBLEMOVESBR9:
             //vacancy at position 8  
-            9b100000000:
               alufn = aluignore;
               asel = 4b1110;
               bsel = 4b0000;
@@ -1213,8 +1246,7 @@ module states (
               ra = 0;
               rb = 0;
               rc = regtemp10;
-              wdsel = 4b1110;
-          }             
+              wdsel = 4b1110;          
            currentstate.d = currentstate.STAGE2CHECKMOVEPOSSIBLEPART1;                   
           
             
@@ -1232,9 +1264,9 @@ module states (
           
       currentstate.STAGE2CHECKMOVEPOSSIBLEPART2:
           statenumber = 7b0101100;
-          alufn = alucmplt;
+          alufn = alucmpeq;
           asel = 4b0000;
-          bsel = 4b0001;
+          bsel = 4b1010;
           we = 1;
           ra = regtemp7;
           rb = 0;
@@ -1362,8 +1394,8 @@ module states (
             currentplayer.d=2;}
           else if(currentplayer.q==2){
             wdsel=4b0010;
-            currentplayer.d=1;
-            currentstate.d = currentstate.STAGE2RESETTIMER;}
+            currentplayer.d=1;}
+          currentstate.d = currentstate.STAGE2RESETTIMER;
             
         currentstate.STAGE2RESETTIMER:
           statenumber = 7b0010000;
