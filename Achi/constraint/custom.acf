@@ -65,7 +65,7 @@ pin player2_turn_LED A2;
 //Indicator LEDS
 //1st to 3rd element in row 3 of Bank B from the left
 pin choose_level_LED[0] B24;
-pin choose_level_LED[1] C3; //B21 doesnt work
+pin choose_level_LED[1] B21; //previously C3 
 pin choose_level_LED[2] B18;
 
 //4th and 5th element in row 3 of Bank B from the left
