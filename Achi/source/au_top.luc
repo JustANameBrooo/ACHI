@@ -20,7 +20,9 @@ module au_top (
     output current_stage_LED[2], //the leds to show which stage players are in
     output error_LED, //led to show an error occurred
     output buzzer, //passive buzzer for sound
-    output timer_7seg[8] // 7 segment for the countdown timer
+    output timer_7seg[8], // 7 segment for the countdown timer
+    
+    output statenumber_led[7] // statenumber tracking for test
     
   ) {
     
@@ -40,6 +42,10 @@ module au_top (
 
   edge_detector gridbuttondetector[9](#RISE(1), #FALL(0), .clk(clk)); // detect rising edges
   edge_detector levelbuttondetector[3](#RISE(1), #FALL(0), .clk(clk)); // detect rising edges
+  
+  //alu alunit;
+  
+  sig wdsel[4], asel[4], bsel[4];
 
   
   .clk(clk) {
@@ -56,12 +62,14 @@ module au_top (
     usb_tx = usb_rx;        // echo the serial data
     
     
+
+    
     //detect all the buttons for the grid
-    gridbuttoncond.in = grid_buttons[8:0];
+    gridbuttoncond.in = ~grid_buttons[8:0];
     gridbuttondetector.in = gridbuttoncond.out;
     
     //detect all the buttons for the level
-    levelbuttoncond.in = choose_level_buttons[2:0];
+    levelbuttoncond.in = ~choose_level_buttons[2:0];
     levelbuttondetector.in = levelbuttoncond.out;
     
     
@@ -69,24 +77,32 @@ module au_top (
     statemachine.rb_data[15:0] = reg.rb_data[15:0];
     statemachine.grid_in = gridbuttondetector.out;
     statemachine.start = levelbuttondetector.out;
-    
+
+    wdsel = statemachine.wdsel;
+    asel = statemachine.asel;
+    bsel = statemachine.bsel;
+
+    // state tracker
+    statenumber_led = statemachine.statenumber;
     //regfile inputs 
     reg.ra[4:0] = statemachine.ra[4:0];
     reg.rb[4:0] = statemachine.rb[4:0];
     reg.rc[4:0] = statemachine.rc[4:0];
-    reg.we = statemachine.we;
-    reg.data[15:0] = ctrl.data[15:0];
     
     //control inputs 
-    ctrl.asel = statemachine.asel;
-    ctrl.bsel = statemachine.bsel;
-    ctrl.wdsel = statemachine.wdsel;
+    ctrl.asel = asel;
+    ctrl.bsel = bsel;
+    ctrl.wdsel = wdsel;
     ctrl.alufn[5:0] = statemachine.alufn[5:0];
     ctrl.ra_data[15:0] = reg.ra_data[15:0];
     ctrl.rb_data[15:0] = reg.rb_data[15:0];
     
+    
+    reg.we = statemachine.we;
+    reg.data[15:0] = ctrl.data;
+    
     //seven seg timer input 
-    seven_seg_decoder.timer_value[3:0] = reg.time[3:0];
+    seven_seg_decoder.timer_value[3:0] = reg.out_time[3:0];
     
     //passive_buzzer inputs
     if(reg.stage==3){        //someone won
@@ -104,24 +120,21 @@ module au_top (
     //3x3 GRID LEDS & PLAYER TILES LEFT LED
     
     //someone won
+    player1_grid_LED[8:0] = reg.pos[0];
+    player2_grid_LED[8:0] = reg.pos[1];
+    
     if(reg.stage==3){
       //if player 1 wins, light up all their leds
       if(reg.player==2b01){
-         player1_grid_LED[8:0] = 9b000000000;
-         player2_grid_LED[8:0] = 9b111111111;
          player1_tiles_left_LED[3:0] = 4b1111;
          player2_tiles_left_LED[3:0] = 4b0000;
 
       } else{ //if player 2 wins, light up all their leds
-         player1_grid_LED[8:0] = 9b000000000;
-         player2_grid_LED[8:0] = 9b111111111;
          player1_tiles_left_LED[3:0] = 4b0000;
          player2_tiles_left_LED[3:0] = 4b1111;
       }
     } else{ //no one won yet
-      player1_grid_LED[8:0] = reg.pos[0];
-      player2_grid_LED[8:0] = reg.pos[1];
-
+      //player1_grid_LED[1:0] = reg.level[1:0];
       player1_tiles_left_LED[3:0] = reg.tiles[0];
       player2_tiles_left_LED[3:0] = reg.tiles[1];
     }
@@ -129,14 +142,18 @@ module au_top (
     //PLAYER MISSED LED
     //player1
     //normally nothing lights up
-    player1_missed_LED[0] = reg.miss[0][0];
-    player1_missed_LED[1] = reg.miss[0][1];
-    
-    //player2
-    //normally nothing lights up
-    player2_missed_LED[0] = reg.miss[1][0];
-    player2_missed_LED[1] = reg.miss[1][1];
-       
+    if(reg.level!=2b00){
+      player1_missed_LED[0] = reg.miss[0][0];
+      player1_missed_LED[1] = reg.miss[0][1];
+      
+      //player2
+      //normally nothing lights up
+      player2_missed_LED[0] = reg.miss[1][0];
+      player2_missed_LED[1] = reg.miss[1][1];
+    } else {
+      player1_missed_LED = 2b00;
+      player2_missed_LED = 2b00;
+    }
     
     //PLAYER TURN LED
     player1_turn_LED = reg.player[0];
@@ -147,11 +164,17 @@ module au_top (
     choose_level_LED[2] = 0;  
     choose_level_LED[1] = 0;
     choose_level_LED[0] = 0;
-    if(reg.level==1){            //level 1
-        choose_level_LED[0] = 1; 
-    } else if(reg.level==2) {    //level 2
-        choose_level_LED[1] = 1; 
-    } else if(reg.level==3) {    //level 3
+    if(reg.level==2b01){            //level 1
+        choose_level_LED[0] = 1;
+        choose_level_LED[1] = 0;
+        choose_level_LED[2] = 0; 
+    } else if(reg.level==2b10) {    //level 2
+        choose_level_LED[0] = 0;
+        choose_level_LED[1] = 1;
+        choose_level_LED[2] = 0; 
+    } else if(reg.level==2b11) {
+        choose_level_LED[0] = 0;
+        choose_level_LED[1] = 0;    //level 3
         choose_level_LED[2] = 1; 
     } else{                      //either idle or win 
       choose_level_LED[2] = 1;  
@@ -175,10 +198,15 @@ module au_top (
     }
     
     //ERROR LED
-    error_LED = reg.error;
+    if(reg.stage!=3){
+      error_LED = reg.error;
+    } else{
+      error_LED = 0;
+    }
     
     //OTHER INDICATORS
     buzzer = pass_buzz.out; //passive buzzer for sound
-    timer_7seg[6:0] = ~seven_seg_decoder.out; //common cathod 7-seg
+    timer_7seg[7:0] = ~seven_seg_decoder.out; //common cathod 7-seg
+    
   }
 }

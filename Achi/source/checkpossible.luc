@@ -4,43 +4,41 @@ module checkpossible (
   ) {
 
   always {
+  winornot=0;
   
     if (
       // ---- HORIZONTAL WINS ----
       // Tiles 0, 1, 2
-      (rb_data[0] == 1 & rb_data[1] == 1 & rb_data[2] == 1) ||
+      (rb_data[0] == 1 && rb_data[1] == 1 && rb_data[2] == 1) ||
       
       // Tiles 3, 4, 5
-      (rb_data[3] == 1 & rb_data[4] == 1 & rb_data[5] == 1) ||
+      (rb_data[3] == 1 && rb_data[4] == 1 && rb_data[5] == 1) ||
       
       // Tiles 6, 7, 8
-      (rb_data[6] == 1 & rb_data[7] == 1 & rb_data[8] == 1) ||
+      (rb_data[6] == 1 && rb_data[7] == 1 && rb_data[8] == 1) ||
       
       // ---- VERTICAL WINS ----
       // Tiles 0, 3, 6
-      (rb_data[0] == 1 & rb_data[3] == 1 & rb_data[6] == 1) ||
+      (rb_data[0] == 1 && rb_data[3] == 1 && rb_data[6] == 1) ||
       
       // Tiles 1, 4, 7
-      (rb_data[1] == 1 & rb_data[4] == 1 & rb_data[7] == 1) ||
+      (rb_data[1] == 1 && rb_data[4] == 1 && rb_data[7] == 1) ||
       
       // Tiles 2, 5, 8
-      (rb_data[2] == 1 & rb_data[5] == 1 & rb_data[8] == 1) ||
+      (rb_data[2] == 1 && rb_data[5] == 1 && rb_data[8] == 1) ||
       
       // ---- DIAGONAL WINS ----
       // Tiles 2, 4, 6
-      (rb_data[2] == 1 & rb_data[4] == 1 & rb_data[6] == 1) ||
+      (rb_data[2] == 1 && rb_data[4] == 1 && rb_data[6] == 1) ||
       
       // Tiles 0, 4, 8
-      (rb_data[0] == 1 & rb_data[4] == 1 & rb_data[8] == 1)
+      (rb_data[0] == 1 && rb_data[4] == 1 && rb_data[8] == 1)
     ) {
     
         winornot = 1;
     
       } // end if
-      
-    else {
-      winornot = 0;
-    } // end else
+     
      
   } // end always
   
