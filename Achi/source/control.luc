@@ -1,4 +1,6 @@
 module control (
+    // This module includes the ALU, asel, bsel, and wdsel
+
     //input clk,  // clock
     //input rst,  // reset
     input ra_data[16],
@@ -40,6 +42,7 @@ module control (
     //bsel mux
     case(bsel){
       b0000  : alunit.b = rb_data;
+      // one-hot representation of tile positions
       b0001  : alunit.b = 16b000000001; //ZERO
       b0010  : alunit.b = 16b000000010; //ONE
       b0011  : alunit.b = 16b000000100; //TWO
@@ -49,7 +52,7 @@ module control (
       b0111  : alunit.b = 16b001000000; //SIX
       b1000  : alunit.b = 16b010000000; //SEVEN
       b1001  : alunit.b = 16b100000000; //EIGHT
-      b1010  : alunit.b = 16b0; //0
+      b1010  : alunit.b = 16b0; //Constant 0
       default: alunit.b = rb_data;
       
     }

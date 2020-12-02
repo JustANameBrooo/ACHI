@@ -9,17 +9,12 @@ module passive_buzzer (
   //win Frequency at roughly 3000+Hz
   //error frequency at roughly 1000+Hz
   
-  //honestly do not know if the div is ok, 2^15 cycles is roughly 3052Hz
+  //2^15 cycles is roughly 3052Hz
   counter winfrequencyCounter(#SIZE(1), #DIV(15), .clk(clk), .rst(rst)); 
-  //honestly do not know if the div is ok, 2^16 cycles is roughly 1526Hz
-  counter errorfrequencyCounter(#SIZE(1), #DIV(16), .clk(clk), .rst(rst)); 
-
-  //edge_detector winfrequencyCounterDetector(#RISE(1), #FALL(0), .clk(clk));
-  //edge_detector errorfrequencyCounterDetector(#RISE(1), #FALL(0), .clk(clk));
+  //2^16 cycles is roughly 1526Hz
+  counter errorfrequencyCounter(#SIZE(1), #DIV(16), .clk(clk), .rst(rst));
   
   always {
-    //winfrequencyCounterDetector.in = winfrequencyCounter.value;
-    //errorfrequencyCounterDetector.in = errorfrequencyCounter.value;
     if(playing==1){
       if(winError==0){ // error
         out = errorfrequencyCounter.value;

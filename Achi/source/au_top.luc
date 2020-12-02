@@ -22,7 +22,7 @@ module au_top (
     output buzzer, //passive buzzer for sound
     output timer_7seg[8], // 7 segment for the countdown timer
     
-    output statenumber_led[7] // statenumber tracking for test
+    output statenumber_led[7] // statenumber tracking for debugging
     
   ) {
     
@@ -82,7 +82,7 @@ module au_top (
     asel = statemachine.asel;
     bsel = statemachine.bsel;
 
-    // state tracker
+    //state tracker for debugging
     statenumber_led = statemachine.statenumber;
     //regfile inputs 
     reg.ra[4:0] = statemachine.ra[4:0];
